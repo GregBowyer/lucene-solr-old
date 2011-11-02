@@ -54,9 +54,11 @@ public interface SolrCache<K,V> extends SolrInfoMBean {
    * <p>
    * The {@link CacheRegenerator} is what the cache uses during auto-warming to
    * renenerate an item in the new cache from an entry in the old cache.
-   *
+   * <p>
+   * The {@link CacheGuarantor} is used to ensure that new cache entries are valid for the
+   * underlying cache
    */
-  public Object init(Map args, Object persistence, CacheRegenerator regenerator);
+  public Object init(Map args, Object persistence, CacheRegenerator regenerator, CacheGuarantor<K, V> cacheGaurentor);
   // I don't think we need a factory for faster creation given that these
   // will be associated with slow-to-create SolrIndexSearchers.
   // change to NamedList when other plugins do?

@@ -289,6 +289,23 @@ public class SolrIndexSearcher extends IndexSearcher implements SolrInfoMBean {
     }
     return storedHighlightFieldNames;
   }
+
+  public static void initGuarantors(SolrConfig solrConfig) {
+    if (solrConfig.filterCacheConfig != null && solrConfig.filterCacheConfig.getGuarantor() == CacheGuarantor.NoopGuarantor) {
+      solrConfig.filterCacheConfig.setGuarantor(
+        new CacheGuarantor<Query, DocSet>() {
+          public void ensureCacheItemIsValid(Query query, DocSet docSet) throws IllegalArgumentException {
+            if (!(query instanceof FilteredQuery)) {
+              throw new IllegalArgumentException(
+                String.format("The filter cache was asked to cache a none filter query [query<%s>=%s]",
+                  query.getClass().getCanonicalName(), query));
+            }
+          }
+        }
+      );
+    }
+  }
+
   //
   // Set default regenerators on filter and query caches if they don't have any
   //

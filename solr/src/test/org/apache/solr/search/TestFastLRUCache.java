@@ -48,7 +48,7 @@ public class TestFastLRUCache extends LuceneTestCase {
         return true;
       }
     };
-    Object o = sc.init(l, null, cr);
+    Object o = sc.init(l, null, cr, CacheGuarantor.NoopGuarantor);
     sc.setState(SolrCache.State.LIVE);
     for (int i = 0; i < 101; i++) {
       sc.put(i + 1, "" + (i + 1));
@@ -64,7 +64,7 @@ public class TestFastLRUCache extends LuceneTestCase {
 
 
     FastLRUCache scNew = new FastLRUCache();
-    scNew.init(l, o, cr);
+    scNew.init(l, o, cr, CacheGuarantor.NoopGuarantor);
     scNew.warm(null, sc);
     scNew.setState(SolrCache.State.LIVE);
     sc.close();
@@ -81,6 +81,30 @@ public class TestFastLRUCache extends LuceneTestCase {
     assertEquals(2L, nl.get("cumulative_hits"));
     assertEquals(102L, nl.get("cumulative_inserts"));
     scNew.close();
+  }
+
+  public void testGuarantor() {
+    boolean fail = true;
+    try {
+      FastLRUCache cache = new FastLRUCache();
+      Map l = new HashMap();
+      l.put("size", "100");
+      l.put("initialSize", "10");
+      l.put("autowarmCount", "25");
+      CacheGuarantor cg = new CacheGuarantor<Object, Object>() {
+        public void ensureCacheItemIsValid(Object key, Object value) throws IllegalArgumentException {
+          // We are only testing that its broken for insertions thats all
+          throw new IllegalArgumentException("Should be broken");
+        }
+      };
+
+      cache.init(l, null, null, cg);
+      cache.put("test", "test");
+    } catch (IllegalArgumentException iae) {
+      fail = false;
+    }
+
+    assertFalse("The cache should have rejected the last insertion", fail);
   }
 
   public void testOldestItems() {
@@ -176,7 +200,7 @@ public class TestFastLRUCache extends LuceneTestCase {
     l.put("size", ""+cacheSize);
     l.put("initialSize", ""+cacheSize);
 
-    Object o = sc.init(l, null, null);
+    Object o = sc.init(l, null, null, CacheGuarantor.NoopGuarantor);
     sc.setState(SolrCache.State.LIVE);
 
     fillCache(sc, cacheSize, maxKey);

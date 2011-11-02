@@ -54,13 +54,15 @@ public class FastLRUCache<K,V> implements SolrCache<K,V> {
   private int autowarmCount;
   private State state;
   private CacheRegenerator regenerator;
+  private CacheGuarantor<K,V> guarantor;
   private String description = "Concurrent LRU Cache";
   private ConcurrentLRUCache<K,V> cache;
   private int showItems = 0;
 
-  public Object init(Map args, Object persistence, CacheRegenerator regenerator) {
+  public Object init(Map args, Object persistence, CacheRegenerator regenerator, CacheGuarantor<K, V> guarantor) {
     state = State.CREATED;
     this.regenerator = regenerator;
+    this.guarantor = guarantor;
     name = (String) args.get("name");
     String str = (String) args.get("size");
     int limit = str == null ? 1024 : Integer.parseInt(str);
@@ -95,10 +97,11 @@ public class FastLRUCache<K,V> implements SolrCache<K,V> {
     showItems = str == null ? 0 : Integer.parseInt(str);
 
 
-    description = "Concurrent LRU Cache(maxSize=" + limit + ", initialSize=" + initialSize +
-            ", minSize="+minLimit + ", acceptableSize="+acceptableLimit+", cleanupThread="+newThread;
+    description = String.format(
+      "Concurrent LRU Cache(maxSize=%d, initialSize=%d, minSize=%d, acceptableSize=%d, cleanupThread=%s, guarantor=%s",
+      limit, initialSize, minLimit, acceptableLimit, newThread, this.guarantor);
     if (autowarmCount > 0) {
-      description += ", autowarmCount=" + autowarmCount + ", regenerator=" + regenerator;
+      description += String.format(", autowarmCount=%d, regenerator=%s", autowarmCount, regenerator);
     }
     description += ')';
 
@@ -129,6 +132,7 @@ public class FastLRUCache<K,V> implements SolrCache<K,V> {
   }
 
   public V put(K key, V value) {
+    guarantor.ensureCacheItemIsValid(key, value);
     return cache.put(key, value);
   }
 

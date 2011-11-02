@@ -28,6 +28,7 @@ import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrResourceLoader;
 
 import javax.xml.xpath.XPathConstants;
+import static org.apache.solr.search.CacheGuarantor.NoopGuarantor;
 
 /**
  * Contains the knowledge of how cache config is
@@ -42,6 +43,7 @@ public class CacheConfig {
   private Class clazz;
   private Map<String,String> args;
   private CacheRegenerator regenerator;
+  private CacheGuarantor guarantor;
 
   private String cacheImpl;
 
@@ -51,10 +53,11 @@ public class CacheConfig {
 
   public CacheConfig() {}
 
-  public CacheConfig(Class clazz, Map<String,String> args, CacheRegenerator regenerator) {
+  public CacheConfig(Class clazz, Map<String,String> args, CacheRegenerator regenerator, CacheGuarantor guarantor) {
     this.clazz = clazz;
     this.args = args;
     this.regenerator = regenerator;
+    this.guarantor = (guarantor != null) ? NoopGuarantor : guarantor;
   }
 
   public CacheRegenerator getRegenerator() {
@@ -63,6 +66,14 @@ public class CacheConfig {
 
   public void setRegenerator(CacheRegenerator regenerator) {
     this.regenerator = regenerator;
+  }
+
+  public CacheGuarantor getGuarantor() {
+    return guarantor;
+  }
+
+  public void setGuarantor(CacheGuarantor guarantor) {
+    this.guarantor = guarantor;
   }
 
   public static CacheConfig[] getMultipleConfigs(SolrConfig solrConfig, String configPath) {
@@ -99,6 +110,9 @@ public class CacheConfig {
     if (config.regenImpl != null) {
       config.regenerator = (CacheRegenerator) loader.newInstance(config.regenImpl);
     }
+
+    String guarantorImpl = config.args.get("guarantor");
+    config.guarantor = (guarantorImpl != null) ? (CacheGuarantor) loader.newInstance(guarantorImpl) : NoopGuarantor;
     
     return config;
   }
@@ -106,7 +120,7 @@ public class CacheConfig {
   public SolrCache newInstance() {
     try {
       SolrCache cache = (SolrCache)clazz.newInstance();
-      persistence[0] = cache.init(args, persistence[0], regenerator);
+      persistence[0] = cache.init(args, persistence[0], regenerator, guarantor);
       return cache;
     } catch (Exception e) {
       SolrException.log(SolrCache.log,"Error instantiating cache",e);

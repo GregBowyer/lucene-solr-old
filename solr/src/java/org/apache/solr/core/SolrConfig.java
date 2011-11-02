@@ -158,7 +158,7 @@ public class SolrConfig extends Config {
       args.put("size","10000");
       args.put("initialSize","10");
       args.put("showItems","-1");
-      conf = new CacheConfig(FastLRUCache.class, args, null);
+      conf = new CacheConfig(FastLRUCache.class, args, null, null);
     }
     fieldValueCacheConfig = conf;
     unlockOnStartup = getBool("mainIndex/unlockOnStartup", false);
@@ -169,6 +169,7 @@ public class SolrConfig extends Config {
     userCacheConfigs = CacheConfig.getMultipleConfigs(this, "query/cache");
 
     org.apache.solr.search.SolrIndexSearcher.initRegenerators(this);
+    org.apache.solr.search.SolrIndexSearcher.initGuarantors(this);
 
     hashSetInverseLoadFactor = 1.0f / getFloat("//HashDocSet/@loadFactor",0.75f);
     hashDocSetMaxSize= getInt("//HashDocSet/@maxSize",3000);

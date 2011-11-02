@@ -59,11 +59,13 @@ public class LRUCache<K,V> implements SolrCache<K,V> {
   private int autowarmCount;
   private State state;
   private CacheRegenerator regenerator;
+  private CacheGuarantor<K, V> guarantor;
   private String description="LRU Cache";
 
-  public Object init(Map args, Object persistence, CacheRegenerator regenerator) {
+  public Object init(Map args, Object persistence, CacheRegenerator regenerator, CacheGuarantor<K, V> guarantor) {
     state=State.CREATED;
     this.regenerator = regenerator;
+    this.guarantor = guarantor;
     name = (String)args.get("name");
     String str = (String)args.get("size");
     final int limit = str==null ? 1024 : Integer.parseInt(str);
@@ -115,6 +117,7 @@ public class LRUCache<K,V> implements SolrCache<K,V> {
   }
 
   public V put(K key, V value) {
+    guarantor.ensureCacheItemIsValid(key, value);
     synchronized (map) {
       if (state == State.LIVE) {
         stats.inserts.incrementAndGet();
