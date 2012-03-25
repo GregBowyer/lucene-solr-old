@@ -555,35 +555,4 @@ public class SolrRecordWriter<K, V> extends RecordWriter<K, V> {
 
   }
   
-  /*
-  static boolean setLogLevel(String packageName, String level) {
-    Log logger = LogFactory.getLog(packageName);
-    if (logger == null) {
-      return false;
-    }
-    // look for: org.apache.commons.logging.impl.SLF4JLocationAwareLog
-    LOG.warn("logger class:"+logger.getClass().getName());
-    if (logger instanceof Log4JLogger) {
-      process(((Log4JLogger) logger).getLogger(), level);
-      return true;
-    }
-    if (logger instanceof Jdk14Logger) {
-      process(((Jdk14Logger) logger).getLogger(), level);
-      return true;
-    }
-    return false;
-  }
-
-  public static void process(org.apache.log4j.Logger log, String level) {
-    if (level != null) {
-      log.setLevel(org.apache.log4j.Level.toLevel(level));
-    }
-  }
-
-  public static void process(java.util.logging.Logger log, String level) {
-    if (level != null) {
-      log.setLevel(java.util.logging.Level.parse(level));
-    }
-  }
-  */
 }
