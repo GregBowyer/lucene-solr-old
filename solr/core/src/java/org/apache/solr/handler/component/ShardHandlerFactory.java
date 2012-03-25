@@ -17,9 +17,9 @@ package org.apache.solr.handler.component;
  */
 
 
-public abstract class ShardHandlerFactory {
+public interface ShardHandlerFactory {
 
-  public abstract ShardHandler getShardHandler();
+  public ShardHandler getShardHandler();
 
-  public abstract void close();
+  public void close();
 }

@@ -33,7 +33,7 @@ import java.net.MalformedURLException;
 import java.util.Random;
 import java.util.concurrent.*;
 
-public class HttpShardHandlerFactory extends ShardHandlerFactory implements PluginInfoInitialized {
+public class HttpShardHandlerFactory implements ShardHandlerFactory, PluginInfoInitialized {
   protected static Logger log = LoggerFactory.getLogger(HttpShardHandlerFactory.class);
 
   // We want an executor that doesn't take up any resources if

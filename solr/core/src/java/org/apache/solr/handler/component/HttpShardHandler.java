@@ -46,7 +46,7 @@ import java.net.ConnectException;
 import java.util.*;
 import java.util.concurrent.*;
 
-public class HttpShardHandler extends ShardHandler {
+public class HttpShardHandler implements ShardHandler {
 
   private HttpShardHandlerFactory httpShardHandlerFactory;
   private CompletionService<ShardResponse> completionService;

@@ -16,13 +16,12 @@ package org.apache.solr.handler.component;
  * limitations under the License.
  */
 
-
 import org.apache.solr.common.params.ModifiableSolrParams;
 
-public abstract class ShardHandler {
-  public abstract void checkDistributed(ResponseBuilder rb);
-  public abstract void submit(ShardRequest sreq, String shard, ModifiableSolrParams params) ;
-  public abstract ShardResponse takeCompletedIncludingErrors();
-  public abstract ShardResponse takeCompletedOrError();
-  public abstract void cancelAll();
+public interface ShardHandler {
+  public void checkDistributed(ResponseBuilder rb);
+  public void submit(ShardRequest sreq, String shard, ModifiableSolrParams params) ;
+  public ShardResponse takeCompletedIncludingErrors();
+  public ShardResponse takeCompletedOrError();
+  public void cancelAll();
 }
