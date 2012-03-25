@@ -6,8 +6,8 @@ package org.apache.solr.hadoop.csv;
 import java.io.IOException;
 import java.io.StringReader;
 
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVStrategy;
+import org.apache.solr.internal.csv.CSVParser;
+import org.apache.solr.internal.csv.CSVStrategy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
