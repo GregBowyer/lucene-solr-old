@@ -77,35 +77,6 @@ import org.apache.solr.core.SolrResourceLoader;
 public class SolrRecordWriter<K, V> extends RecordWriter<K, V> {
   static final Log LOG = LogFactory.getLog(SolrRecordWriter.class);
 
-  public final static List<String> allowedConfigDirectories = new ArrayList<String>(
-      Arrays.asList(new String[] { "conf", "lib" }));
-
-  public final static Set<String> requiredConfigDirectories = new HashSet<String>();
-  static {
-    requiredConfigDirectories.add("conf");
-  }
-
-  /**
-   * Return the list of directories names that may be included in the
-   * configuration data passed to the tasks.
-   * 
-   * @return an UnmodifiableList of directory names
-   */
-  public static List<String> getAllowedConfigDirectories() {
-    return Collections.unmodifiableList(allowedConfigDirectories);
-  }
-
-  /**
-   * check if the passed in directory is required to be present in the
-   * configuration data set.
-   * 
-   * @param directory The directory to check
-   * @return true if the directory is required.
-   */
-  public static boolean isRequiredConfigDirectory(final String directory) {
-    return requiredConfigDirectories.contains(directory);
-  }
-
   private SolrDocumentConverter<K, V> converter;
 
   private EmbeddedSolrServer solr;
@@ -179,10 +150,10 @@ public class SolrRecordWriter<K, V> extends RecordWriter<K, V> {
       heartBeater.needHeartBeat();
       /** The actual file in hdfs that holds the configuration. */
 
-      final String configuredSolrConfigPath = conf.get(SolrOutputFormat.SETUP_OK);
+      final String configuredSolrConfigPath = conf.get(SolrHadoopUtils.SETUP_OK);
       if (configuredSolrConfigPath == null) {
         throw new IllegalStateException(String.format(
-            "The job did not pass %s", SolrOutputFormat.SETUP_OK));
+            "The job did not pass %s", SolrHadoopUtils.SETUP_OK));
       }
       outputZipFile = SolrOutputFormat.isOutputZipFormat(conf);
 
@@ -277,14 +248,14 @@ public class SolrRecordWriter<K, V> extends RecordWriter<K, V> {
     Path[] localArchives = DistributedCache.getLocalCacheArchives(conf);
     if (localArchives.length == 0) {
       throw new IOException(String.format(
-          "No local cache archives, where is %s:%s", SolrOutputFormat
-              .getSetupOk(), SolrOutputFormat.getZipName(conf)));
+          "No local cache archives, where is %s:%s", SolrHadoopUtils
+              .getSetupOk(), SolrHadoopUtils.getZipName(conf)));
     }
     for (Path unpackedDir : localArchives) {
       // Only logged if debugging
       if (LOG.isDebugEnabled()) {
         LOG.debug(String.format("Examining unpack directory %s for %s",
-            unpackedDir, SolrOutputFormat.getZipName(conf)));
+            unpackedDir, SolrHadoopUtils.getZipName(conf)));
 
         ProcessBuilder lsCmd = new ProcessBuilder(new String[] { "/bin/ls",
             "-lR", unpackedDir.toString() });
@@ -301,7 +272,7 @@ public class SolrRecordWriter<K, V> extends RecordWriter<K, V> {
         }
         System.err.format("Exit value is %d%n", ls.exitValue());
       }
-      if (unpackedDir.getName().equals(SolrOutputFormat.getZipName(conf))) {
+      if (unpackedDir.getName().equals(SolrHadoopUtils.getZipName(conf))) {
 
         solrHome = unpackedDir;
         break;

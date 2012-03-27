@@ -55,7 +55,7 @@ public class SearchHandler extends RequestHandlerBase implements SolrCoreAware ,
   protected static Logger log = LoggerFactory.getLogger(SearchHandler.class);
 
   protected List<SearchComponent> components = null;
-  private ShardHandlerFactory shardHandlerFactory ;
+  protected ShardHandlerFactory shardHandlerFactory ;
   private PluginInfo shfInfo;
 
   protected List<String> getDefaultComponents()

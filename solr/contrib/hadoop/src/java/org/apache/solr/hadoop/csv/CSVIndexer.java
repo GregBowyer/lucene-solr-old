@@ -22,6 +22,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.solr.hadoop.SolrDocumentConverter;
+import org.apache.solr.hadoop.SolrHadoopUtils;
 import org.apache.solr.hadoop.SolrOutputFormat;
 
 public class CSVIndexer extends Configured implements Tool {
@@ -74,7 +75,7 @@ public class CSVIndexer extends Configured implements Tool {
     job.setMapperClass(CSVMapper.class);
     job.setReducerClass(CSVReducer.class);
     job.setOutputFormatClass(SolrOutputFormat.class);
-    SolrOutputFormat.setupSolrHomeCache(new File(solrHome), job.getConfiguration());
+    SolrHadoopUtils.setupSolrHomeCache(new File(solrHome), job.getConfiguration());
     if (shards > 0) {
       job.setNumReduceTasks(shards);
     }
