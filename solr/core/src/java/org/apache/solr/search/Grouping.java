@@ -281,8 +281,7 @@ public class Grouping {
     DocListAndSet out = new DocListAndSet();
     qr.setDocListAndSet(out);
 
-    SolrIndexSearcher.ProcessedFilter pf = searcher.getProcessedFilter(cmd.getFilter(), cmd.getFilterList());
-    final Filter luceneFilter = pf.filter;
+    final Filter luceneFilter = cmd.getFilter();
     maxDoc = searcher.maxDoc();
 
     needScores = (cmd.getFlags() & SolrIndexSearcher.GET_SCORES) != 0;
@@ -339,11 +338,6 @@ public class Grouping {
       }
     }
 
-    if (pf.postFilter != null) {
-      pf.postFilter.setLastDelegate(allCollectors);
-      allCollectors = pf.postFilter;
-    }
-
     if (allCollectors != null) {
       searchWithTimeLimiter(luceneFilter, allCollectors);
     }
@@ -377,10 +371,6 @@ public class Grouping {
             searchWithTimeLimiter(luceneFilter, secondPhaseCollectors);
           }
         } else {
-          if (pf.postFilter != null) {
-            pf.postFilter.setLastDelegate(secondPhaseCollectors);
-            secondPhaseCollectors = pf.postFilter;
-          }
           searchWithTimeLimiter(luceneFilter, secondPhaseCollectors);
         }
       }

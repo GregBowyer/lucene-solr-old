@@ -17,6 +17,7 @@
 
 package org.apache.solr.handler.component;
 
+import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.grouping.SearchGroup;
@@ -67,7 +68,7 @@ public class ResponseBuilder
   private QParser qparser = null;
   private String queryString = null;
   private Query query = null;
-  private List<Query> filters = null;
+  private Filter filter = null;
   private SortSpec sortSpec = null;
   private GroupingSpecification groupingSpec;
   //used for handling deep paging
@@ -269,12 +270,12 @@ public class ResponseBuilder
     this.fieldFlags = fieldFlags;
   }
 
-  public List<Query> getFilters() {
-    return filters;
+  public Filter getFilter() {
+    return filter;
   }
 
-  public void setFilters(List<Query> filters) {
-    this.filters = filters;
+  public void setFilter(Filter filter) {
+    this.filter = filter;
   }
 
   public Query getHighlightQuery() {
@@ -380,13 +381,13 @@ public class ResponseBuilder
   public SolrIndexSearcher.QueryCommand getQueryCommand() {
     SolrIndexSearcher.QueryCommand cmd = new SolrIndexSearcher.QueryCommand();
     cmd.setQuery(getQuery())
-            .setFilterList(getFilters())
-            .setSort(getSortSpec().getSort())
-            .setOffset(getSortSpec().getOffset())
-            .setLen(getSortSpec().getCount())
-            .setFlags(getFieldFlags())
-            .setNeedDocSet(isNeedDocSet())
-            .setScoreDoc(getScoreDoc()); //Issue 1726
+        .setFilter(getFilter())
+        .setSort(getSortSpec().getSort())
+        .setOffset(getSortSpec().getOffset())
+        .setLen(getSortSpec().getCount())
+        .setFlags(getFieldFlags())
+        .setNeedDocSet(isNeedDocSet())
+        .setScoreDoc(getScoreDoc()); //Issue 1726
     return cmd;
   }
 

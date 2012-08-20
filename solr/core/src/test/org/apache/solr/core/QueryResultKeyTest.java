@@ -21,9 +21,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queries.BooleanFilter;
+import org.apache.lucene.queries.FilterClause;
+import org.apache.lucene.queries.TermFilter;
+import org.apache.lucene.queries.TermsFilter;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.QueryWrapperFilter;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
@@ -39,39 +45,47 @@ public class QueryResultKeyTest extends SolrTestCaseJ4 {
     // of filters is in a different order
     
     Sort sort = new Sort(new SortField("test", SortField.Type.INT));
-    List<Query> filters = new ArrayList<Query>();
-    filters.add(new TermQuery(new Term("test", "field")));
-    filters.add(new TermQuery(new Term("test2", "field2")));
-    
+    BooleanFilter filter = new BooleanFilter();
+    filter.add(new TermsFilter(new Term("test", "field")), Occur.MUST);
+    filter.add(new TermsFilter(new Term("test2", "field2")), Occur.MUST);
+
     BooleanQuery query = new BooleanQuery();
     query.add(new TermQuery(new Term("test", "field")), Occur.MUST);
     
-    QueryResultKey qrk1 = new QueryResultKey(query , filters, sort, 1);
-    
-    List<Query> filters2 = new ArrayList<Query>();
-    filters2.add(new TermQuery(new Term("test2", "field2")));
-    filters2.add(new TermQuery(new Term("test", "field")));
-    QueryResultKey qrk2 = new QueryResultKey(query , filters2, sort, 1);
+    QueryResultKey qrk1 = new QueryResultKey(query , filter, sort, 1);
+
+    BooleanQuery query2 = new BooleanQuery();
+    query2.add(new TermQuery(new Term("test", "field")), Occur.MUST);
+
+    BooleanFilter filter2 = new BooleanFilter();
+    filter2.add(new TermsFilter(new Term("test", "field")), Occur.MUST);
+    filter2.add(new TermsFilter(new Term("test2", "field2")), Occur.MUST);
+
+    assertEquals(filter.hashCode(), filter2.hashCode());
+
+    QueryResultKey qrk2 = new QueryResultKey(query2, filter2, sort, 1);
     
     assertEquals(qrk1.hashCode(), qrk2.hashCode());
+    assertEquals(qrk1, qrk2);
   }
 
   @Test
   public void testQueryResultKeySortedFilters() {
     Query fq1 = new TermQuery(new Term("test1", "field1"));
-    Query fq2 = new TermQuery(new Term("test2", "field2"));
 
     Query query = new TermQuery(new Term("test3", "field3"));
-    List<Query> filters = new ArrayList<Query>();
-    filters.add(fq1);
-    filters.add(fq2);
 
-    QueryResultKey key = new QueryResultKey(query, filters, null, 0);
+    BooleanFilter filter = new BooleanFilter();
+    filter.add(new QueryWrapperFilter(fq1), Occur.MUST);
+    filter.add(new TermFilter(new Term("test2", "field2")), Occur.MUST);
 
-    List<Query> newFilters = new ArrayList<Query>();
-    newFilters.add(fq2);
-    newFilters.add(fq1);
-    QueryResultKey newKey = new QueryResultKey(query, newFilters, null, 0);
+    QueryResultKey key = new QueryResultKey(query, filter, null, 0);
+
+    BooleanFilter filter2 = new BooleanFilter();
+    filter.add(new TermFilter(new Term("test2", "field2")), Occur.MUST);
+    filter.add(new QueryWrapperFilter(fq1), Occur.MUST);
+
+    QueryResultKey newKey = new QueryResultKey(query, filter2, null, 0);
 
     assertEquals(key, newKey);
   }

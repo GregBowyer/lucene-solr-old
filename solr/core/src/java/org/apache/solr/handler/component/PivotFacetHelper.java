@@ -140,7 +140,7 @@ public class PivotFacetHelper extends SimpleFacets
             subset = docs.andNot(hasVal);
           } else {
             Query query = new TermQuery(new Term(field, termval));
-            subset = searcher.getDocSet(query, docs);
+            subset = searcher.getDocSet(query, docs.getTopFilter());
           }
           super.docs = subset;//used by getTermCounts()
 

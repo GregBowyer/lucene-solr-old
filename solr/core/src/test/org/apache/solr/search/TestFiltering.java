@@ -17,11 +17,11 @@
 
 package org.apache.solr.search;
 
-
 import org.apache.lucene.util.OpenBitSet;
 import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.util.RefCounted;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -35,7 +35,6 @@ public class TestFiltering extends SolrTestCaseJ4 {
     initCore("solrconfig.xml","schema12.xml");
   }
 
-
   public void testCaching() throws Exception {
     clearIndex();
     assertU(adoc("id","4", "val_i","1"));
@@ -44,72 +43,77 @@ public class TestFiltering extends SolrTestCaseJ4 {
     assertU(adoc("id","2", "val_i","4"));
     assertU(commit());
 
-    int prevCount;
+    RefCounted<SolrIndexSearcher> searcher = h.getCore().getSearcher();
+    SolrCache filterCache = searcher.get().getFilterCache();
+    searcher.decref();
 
-    prevCount = DelegatingCollector.setLastDelegateCount;
+    int prevCount = filterCache.size();
+
     assertJQ(req("q","*:*", "fq","{!frange l=2 u=3 cache=false cost=100}val_i")
         ,"/response/numFound==2"
     );
-    assertEquals(1, DelegatingCollector.setLastDelegateCount - prevCount);
+    assertEquals(0, filterCache.size() - prevCount);
 
     // The exact same query the second time will be cached by the queryCache
-    prevCount = DelegatingCollector.setLastDelegateCount;
+    prevCount = filterCache.size();
     assertJQ(req("q","*:*", "fq","{!frange l=2 u=3 cache=false cost=100}val_i")
         ,"/response/numFound==2"
     );
-    assertEquals(0, DelegatingCollector.setLastDelegateCount - prevCount);
+    assertEquals(0, filterCache.size() - prevCount);
 
     // cache is true by default
-    prevCount = DelegatingCollector.setLastDelegateCount;
+    prevCount = filterCache.size();
     assertJQ(req("q","*:*", "fq","{!frange l=2 u=4}val_i")
         ,"/response/numFound==3"
     );
-    assertEquals(0, DelegatingCollector.setLastDelegateCount - prevCount);
+    assertEquals(1, filterCache.size() - prevCount);
+
+    // Did we use it, or add a new entry ?
+    assertJQ(req("q","*:*", "fq","{!frange l=2 u=4}val_i")
+        ,"/response/numFound==3"
+    );
+    assertEquals(1, filterCache.size());
 
     // default cost avoids post filtering
-    prevCount = DelegatingCollector.setLastDelegateCount;
+    prevCount = filterCache.size();
     assertJQ(req("q","*:*", "fq","{!frange l=2 u=5 cache=false}val_i")
         ,"/response/numFound==3"
     );
-    assertEquals(0, DelegatingCollector.setLastDelegateCount - prevCount);
-
+    assertEquals(prevCount, filterCache.size());
 
     // now re-do the same tests w/ faceting on to get the full docset
-
-    prevCount = DelegatingCollector.setLastDelegateCount;
+    prevCount = filterCache.size() ;
     assertJQ(req("facet","true", "facet.field","id", "q","*:*", "fq","{!frange l=2 u=6 cache=false cost=100}val_i")
         ,"/response/numFound==3"
     );
-    assertEquals(1, DelegatingCollector.setLastDelegateCount - prevCount);
+    assertEquals(prevCount, filterCache.size());
 
     // since we need the docset and the filter was not cached, the collector will need to be used again
-    prevCount = DelegatingCollector.setLastDelegateCount;
+    prevCount = filterCache.size();
     assertJQ(req("facet","true", "facet.field","id", "q","*:*", "fq","{!frange l=2 u=6 cache=false cost=100}val_i")
         ,"/response/numFound==3"
     );
-    assertEquals(1, DelegatingCollector.setLastDelegateCount - prevCount);
+    assertEquals(prevCount, filterCache.size());
 
     // cache is true by default
-    prevCount = DelegatingCollector.setLastDelegateCount;
+    prevCount = filterCache.size();
     assertJQ(req("facet","true", "facet.field","id", "q","*:*", "fq","{!frange l=2 u=7}val_i")
         ,"/response/numFound==3"
     );
-    assertEquals(0, DelegatingCollector.setLastDelegateCount - prevCount);
+    assertEquals(prevCount + 1, filterCache.size());
 
     // default cost avoids post filtering
-    prevCount = DelegatingCollector.setLastDelegateCount;
+    prevCount = filterCache.size();
     assertJQ(req("facet","true", "facet.field","id", "q","*:*", "fq","{!frange l=2 u=8 cache=false}val_i")
         ,"/response/numFound==3"
     );
-    assertEquals(0, DelegatingCollector.setLastDelegateCount - prevCount);
+    assertEquals(prevCount, filterCache.size());
 
     // test that offset works when not caching main query
     assertJQ(req("q","{!cache=false}*:*", "start","2", "rows","1", "sort","val_i asc", "fl","val_i")
         ,"/response/docs==[{'val_i':3}]"
     );
-
   }
-
 
   class Model {
     int indexSize;
@@ -288,6 +292,9 @@ public class TestFiltering extends SolrTestCaseJ4 {
           params.add("facet.query"); params.add(facetQuery);
         }
 
+        params.add("debugQuery");
+        params.add("true");
+
         if (random().nextInt(100) < 10) {
           params.add("group"); params.add("true");
           params.add("group.main"); params.add("true");
@@ -313,7 +320,7 @@ public class TestFiltering extends SolrTestCaseJ4 {
         }
 
         try {
-          assertJQ(sreq
+            assertJQ(sreq
               ,"/response/numFound==" + expected
               , facet ? "/facet_counts/facet_queries/*:*/==" + expected : null
               , facet ? "/facet_counts/facet_queries/multiSelect/==" + expectedMultiSelect : null

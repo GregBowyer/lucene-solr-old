@@ -450,6 +450,8 @@ public class SimpleFacetsTest extends SolrTestCaseJ4 {
 
     assertQ("check multi-select facets with naming",
             req("q", "id:[42 TO 47]"
+                ,"debugQuery", "true"
+                ,"indent", "true"
                 ,"facet", "true"
                 ,"facet.query", "{!ex=1}trait_s:Obnoxious"
                 ,"facet.query", "{!ex=2 key=foo}id:[42 TO 45]"    // tag=2 same as 1

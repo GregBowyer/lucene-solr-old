@@ -133,7 +133,7 @@ public class SpellCheckCollator {
             new LocalSolrQueryRequest(ultimateResponse.req.getCore(), params),
             new SolrQueryResponse(), Arrays.<SearchComponent> asList(queryComponent)); 
         checkResponse.setQparser(ultimateResponse.getQparser());
-        checkResponse.setFilters(ultimateResponse.getFilters());
+        checkResponse.setFilter(ultimateResponse.getFilter());
         checkResponse.setQueryString(collationQueryStr);
         checkResponse.components = Arrays.<SearchComponent>asList(queryComponent);
 

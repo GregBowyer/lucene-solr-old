@@ -32,6 +32,8 @@ import org.junit.BeforeClass;
 import java.util.*;
 import java.io.IOException;
 
+import static java.lang.String.format;
+
 /**
  *
  */
@@ -155,7 +157,7 @@ public class TestSearchPerf extends AbstractSolrTestCase {
     return ret;
   }
 
-  int doListGen(int iter, Query q, List<Query> filt, boolean cacheQuery, boolean cacheFilt) throws Exception {
+  int doListGen(int iter, Query q, Filter filt, boolean cacheQuery, boolean cacheFilt) throws Exception {
     SolrQueryRequest req = lrf.makeRequest();
 
     SolrIndexSearcher searcher = req.getSearcher();
@@ -170,7 +172,8 @@ public class TestSearchPerf extends AbstractSolrTestCase {
 
     int ret = 0;
     for (int i=0; i<iter; i++) {
-      DocList l = searcher.getDocList(q, filt, (Sort)null, 0, 10, (cacheQuery?0:NO_CHECK_QCACHE)|(cacheFilt?0:NO_CHECK_FILTERCACHE) );
+      int filterCacheBehaviour = (cacheQuery ? 0 : NO_CHECK_QCACHE) | (cacheFilt ? 0 : NO_CHECK_FILTERCACHE);
+      DocList l = searcher.getDocList(q, filt, null, 0, 10, filterCacheBehaviour);
       ret += l.matches();
     }
 
@@ -231,14 +234,13 @@ public class TestSearchPerf extends AbstractSolrTestCase {
 
     SolrQueryRequest req = lrf.makeRequest();
 
-    QParser parser = QParser.getParser("foomany_s:[" + l + " TO " + u + "]", null, req);
-    Query rangeQ = parser.getQuery();
-    List<Query> filters = new ArrayList<Query>();
-    filters.add(rangeQ);
+    FilterBuilder filterBuilder = FilterBuilder.getFilterBuilder(req, "foomany_s:[" + l + " TO " + u + "]");
+    Filter filter = filterBuilder.getFilter();
     req.close();
 
-    parser = QParser.getParser("{!dismax qf=t10_100_ws pf=t10_100_ws ps=20}"+ t(0) + ' ' + t(1) + ' ' + t(2), null, req);
-    Query q= parser.getQuery();
+    String rawQ = format("{!dismax qf=t10_100_ws pf=t10_100_ws ps=20}%s %s %s", t(0), t(1), t(2));
+    QParser parser = QParser.getParser(rawQ, null, req);
+    Query q = parser.getQuery();
 
     // SolrIndexSearcher searcher = req.getSearcher();
     // DocSet range = searcher.getDocSet(rangeQ, null);
@@ -246,10 +248,9 @@ public class TestSearchPerf extends AbstractSolrTestCase {
     createIndex2(indexSize, "foomany_s", "t10_100_ws");
 
     // doListGen(100, q, filters, false, true);
-    doListGen(500, q, filters, false, true);
+    doListGen(500, q, filter, false, true);
 
     req.close();
   }  
-
 
 }

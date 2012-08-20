@@ -85,10 +85,12 @@ public class MoreLikeThisHandler extends RequestHandlerBase
 
     String defType = params.get(QueryParsing.DEFTYPE, QParserPlugin.DEFAULT_QTYPE);
     String q = params.get( CommonParams.Q );
-    Query query = null;
-    SortSpec sortSpec = null;
-    List<Query> filters = null;
 
+    Query query = null;
+    Filter filter = null;
+    SortSpec sortSpec = null;
+
+    String[] rawFqs = req.getParams().getParams(CommonParams.FQ);
     try {
       if (q != null) {
         QParser parser = QParser.getParser(q, defType, req);
@@ -96,16 +98,8 @@ public class MoreLikeThisHandler extends RequestHandlerBase
         sortSpec = parser.getSort(true);
       }
 
-      String[] fqs = req.getParams().getParams(CommonParams.FQ);
-      if (fqs!=null && fqs.length!=0) {
-          filters = new ArrayList<Query>();
-        for (String fq : fqs) {
-          if (fq != null && fq.trim().length()!=0) {
-            QParser fqp = QParser.getParser(fq, null, req);
-            filters.add(fqp.getQuery());
-          }
-        }
-      }
+      FilterBuilder filterBuilder = FilterBuilder.getFilterBuilder(req, rawFqs);
+      filter = filterBuilder.getFilter();
     } catch (SyntaxError e) {
       throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, e);
     }
@@ -145,8 +139,7 @@ public class MoreLikeThisHandler extends RequestHandlerBase
       // Find documents MoreLikeThis - either with a reader or a query
       // --------------------------------------------------------------------------------
       if (reader != null) {
-        mltDocs = mlt.getMoreLikeThis(reader, start, rows, filters,
-            interesting, flags);
+        mltDocs = mlt.getMoreLikeThis(reader, start, rows, filter, interesting, flags);
       } else if (q != null) {
         // Matching options
         boolean includeMatch = params.getBool(MoreLikeThisParams.MATCH_INCLUDE,
@@ -164,8 +157,7 @@ public class MoreLikeThisHandler extends RequestHandlerBase
         if (iterator.hasNext()) {
           // do a MoreLikeThis query for each document in results
           int id = iterator.nextDoc();
-          mltDocs = mlt.getMoreLikeThis(id, start, rows, filters, interesting,
-              flags);
+          mltDocs = mlt.getMoreLikeThis(id, start, rows, filter, interesting, flags);
         }
       } else {
         throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
@@ -230,17 +222,13 @@ public class MoreLikeThisHandler extends RequestHandlerBase
       dbgResults = true;
     }
     // Copied from StandardRequestHandler... perhaps it should be added to doStandardDebug?
-    if (dbg == true) {
+    if (dbg) {
       try {
         NamedList<Object> dbgInfo = SolrPluginUtils.doStandardDebug(req, q, mlt.getRawMLTQuery(), mltDocs.docList, dbgQuery, dbgResults);
-        if (null != dbgInfo) {
-          if (null != filters) {
-            dbgInfo.add("filter_queries",req.getParams().getParams(CommonParams.FQ));
-            List<String> fqs = new ArrayList<String>(filters.size());
-            for (Query fq : filters) {
-              fqs.add(QueryParsing.toString(fq, req.getSchema()));
-            }
-            dbgInfo.add("parsed_filter_queries",fqs);
+        if (dbgInfo != null) {
+          if (filter != null) {
+            dbgInfo.add("filter_queries", rawFqs);
+            dbgInfo.add("filters", filter.toString());
           }
           rsp.add("debug", dbgInfo);
         }
@@ -342,8 +330,8 @@ public class MoreLikeThisHandler extends RequestHandlerBase
       return boostedQuery;
     }
     
-    public DocListAndSet getMoreLikeThis( int id, int start, int rows, List<Query> filters, List<InterestingTerm> terms, int flags ) throws IOException
-    {
+ public DocListAndSet getMoreLikeThis(int id, int start, int rows, Filter filter,
+                                      List<InterestingTerm> terms, int flags) throws IOException {
       StoredDocument doc = reader.document(id);
       rawMLTQuery = mlt.like(id);
       boostedMLTQuery = getBoostedQuery( rawMLTQuery );
@@ -360,15 +348,15 @@ public class MoreLikeThisHandler extends RequestHandlerBase
       
       DocListAndSet results = new DocListAndSet();
       if (this.needDocSet) {
-        results = searcher.getDocListAndSet(realMLTQuery, filters, null, start, rows, flags);
+        results = searcher.getDocListAndSet(realMLTQuery, filter, null, start, rows, flags);
       } else {
-        results.docList = searcher.getDocList(realMLTQuery, filters, null, start, rows, flags);
+        results.docList = searcher.getDocList(realMLTQuery, filter, null, start, rows, flags);
       }
       return results;
     }
 
-    public DocListAndSet getMoreLikeThis( Reader reader, int start, int rows, List<Query> filters, List<InterestingTerm> terms, int flags ) throws IOException
-    {
+    public DocListAndSet getMoreLikeThis(Reader reader, int start, int rows,
+                                         Filter filter, List<InterestingTerm> terms, int flags) throws IOException {
       // analyzing with the first field: previous (stupid) behavior
       rawMLTQuery = mlt.like(reader, mlt.getFieldNames()[0]);
       boostedMLTQuery = getBoostedQuery( rawMLTQuery );
@@ -377,9 +365,9 @@ public class MoreLikeThisHandler extends RequestHandlerBase
       }
       DocListAndSet results = new DocListAndSet();
       if (this.needDocSet) {
-        results = searcher.getDocListAndSet( boostedMLTQuery, filters, null, start, rows, flags);
+        results = searcher.getDocListAndSet(boostedMLTQuery, filter, null, start, rows, flags);
       } else {
-        results.docList = searcher.getDocList( boostedMLTQuery, filters, null, start, rows, flags);
+        results.docList = searcher.getDocList(boostedMLTQuery, filter, null, start, rows, flags);
       }
       return results;
     }

@@ -6,6 +6,7 @@ import org.apache.lucene.util.Bits;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.search.function.ValueSourceRangeFilter;
 
 import java.io.IOException;
 import java.util.Set;
@@ -60,15 +61,6 @@ public class SolrConstantScoreQuery extends ConstantScoreQuery implements Extend
   }
 
   @Override
-  public void setCacheSep(boolean cacheSep) {
-  }
-
-  @Override
-  public boolean getCacheSep() {
-    return false;
-  }
-
-  @Override
   public void setCost(int cost) {
     this.cost = cost;
   }
@@ -97,8 +89,8 @@ public class SolrConstantScoreQuery extends ConstantScoreQuery implements Extend
 
     public ConstantWeight(IndexSearcher searcher) throws IOException {
       this.context = ValueSource.newContext(searcher);
-      if (filter instanceof SolrFilter)
-        ((SolrFilter)filter).createWeight(context, searcher);
+      if (filter instanceof ValueSourceRangeFilter)
+        ((ValueSourceRangeFilter)filter).createWeight(context, searcher);
     }
 
     @Override
@@ -159,7 +151,9 @@ public class SolrConstantScoreQuery extends ConstantScoreQuery implements Extend
       super(w);
       this.theScore = theScore;
       this.acceptDocs = acceptDocs;
-      DocIdSet docIdSet = filter instanceof SolrFilter ? ((SolrFilter)filter).getDocIdSet(w.context, context, acceptDocs) : filter.getDocIdSet(context, acceptDocs);
+      DocIdSet docIdSet = filter instanceof SolrFilter ?
+          ((ValueSourceRangeFilter)filter).getDocIdSet(w.context, context, acceptDocs) :
+          filter.getDocIdSet(context, acceptDocs);
       if (docIdSet == null) {
         docIdSetIterator = DocIdSetIterator.empty();
       } else {

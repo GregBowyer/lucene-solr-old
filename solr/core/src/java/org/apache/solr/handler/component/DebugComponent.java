@@ -25,10 +25,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
-import org.apache.lucene.search.Query;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
-import org.apache.solr.search.QueryParsing;
 import org.apache.solr.util.SolrPluginUtils;
 
 /**
@@ -70,13 +68,9 @@ public class DebugComponent extends SearchComponent
       }
 
       if (null != rb.getDebugInfo() ) {
-        if (rb.isDebugQuery() && null != rb.getFilters() ) {
+        if (rb.isDebugQuery() && null != rb.getFilter()) {
           info.add("filter_queries",rb.req.getParams().getParams(FQ));
-          List<String> fqs = new ArrayList<String>(rb.getFilters().size());
-          for (Query fq : rb.getFilters()) {
-            fqs.add(QueryParsing.toString(fq, rb.req.getSchema()));
-          }
-          info.add("parsed_filter_queries",fqs);
+          info.add("filter", rb.getFilter());
         }
         
         // Add this directly here?

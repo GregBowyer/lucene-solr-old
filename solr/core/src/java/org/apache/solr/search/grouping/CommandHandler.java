@@ -23,7 +23,6 @@ import org.apache.lucene.search.grouping.term.TermAllGroupHeadsCollector;
 import org.apache.lucene.util.OpenBitSet;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.search.*;
-import org.apache.solr.search.SolrIndexSearcher.ProcessedFilter;
 import org.apache.solr.search.QueryUtils;
 import org.apache.solr.search.grouping.distributed.shardresultserializer.ShardResultTransformer;
 import org.slf4j.Logger;
@@ -133,30 +132,29 @@ public class CommandHandler {
       collectors.addAll(command.create());
     }
 
-    ProcessedFilter filter = searcher.getProcessedFilter
-      (queryCommand.getFilter(), queryCommand.getFilterList());
+    Filter luceneFilter = queryCommand.getFilter();
     Query query = QueryUtils.makeQueryable(queryCommand.getQuery());
 
     if (truncateGroups) {
-      docSet = computeGroupedDocSet(query, filter, collectors);
+      docSet = computeGroupedDocSet(query, luceneFilter, collectors);
     } else if (needDocset) {
-      docSet = computeDocSet(query, filter, collectors);
+      docSet = computeDocSet(query, luceneFilter, collectors);
     } else if (!collectors.isEmpty()) {
-      searchWithTimeLimiter(query, filter, MultiCollector.wrap(collectors.toArray(new Collector[nrOfCommands])));
+      searchWithTimeLimiter(query, luceneFilter, MultiCollector.wrap(collectors.toArray(new Collector[nrOfCommands])));
     } else {
-      searchWithTimeLimiter(query, filter, null);
+      searchWithTimeLimiter(query, luceneFilter, null);
     }
   }
 
-  private DocSet computeGroupedDocSet(Query query, ProcessedFilter filter, List<Collector> collectors) throws IOException {
+  private DocSet computeGroupedDocSet(Query query, Filter luceneFilter, List<Collector> collectors) throws IOException {
     Command firstCommand = commands.get(0);
     AbstractAllGroupHeadsCollector termAllGroupHeadsCollector =
         TermAllGroupHeadsCollector.create(firstCommand.getKey(), firstCommand.getSortWithinGroup());
     if (collectors.isEmpty()) {
-      searchWithTimeLimiter(query, filter, termAllGroupHeadsCollector);
+      searchWithTimeLimiter(query, luceneFilter, termAllGroupHeadsCollector);
     } else {
       collectors.add(termAllGroupHeadsCollector);
-      searchWithTimeLimiter(query, filter, MultiCollector.wrap(collectors.toArray(new Collector[collectors.size()])));
+      searchWithTimeLimiter(query, luceneFilter, MultiCollector.wrap(collectors.toArray(new Collector[collectors.size()])));
     }
 
     int maxDoc = searcher.maxDoc();
@@ -164,7 +162,7 @@ public class CommandHandler {
     return new BitDocSet(new OpenBitSet(bits, bits.length));
   }
 
-  private DocSet computeDocSet(Query query, ProcessedFilter filter, List<Collector> collectors) throws IOException {
+  private DocSet computeDocSet(Query query, Filter luceneFilter, List<Collector> collectors) throws IOException {
     int maxDoc = searcher.maxDoc();
     DocSetCollector docSetCollector;
     if (collectors.isEmpty()) {
@@ -173,7 +171,7 @@ public class CommandHandler {
       Collector wrappedCollectors = MultiCollector.wrap(collectors.toArray(new Collector[collectors.size()]));
       docSetCollector = new DocSetDelegateCollector(maxDoc >> 6, maxDoc, wrappedCollectors);
     }
-    searchWithTimeLimiter(query, filter, docSetCollector);
+    searchWithTimeLimiter(query, luceneFilter, docSetCollector);
     return docSetCollector.getDocSet();
   }
 
@@ -190,9 +188,7 @@ public class CommandHandler {
    * Invokes search with the specified filter and collector.  
    * If a time limit has been specified then wrap the collector in the TimeLimitingCollector
    */
-  private void searchWithTimeLimiter(final Query query, 
-                                     final ProcessedFilter filter, 
-                                     Collector collector) throws IOException {
+  private void searchWithTimeLimiter(final Query query, final Filter luceneFilter, Collector collector) throws IOException {
     if (queryCommand.getTimeAllowed() > 0 ) {
       collector = new TimeLimitingCollector(collector, TimeLimitingCollector.getGlobalCounter(), queryCommand.getTimeAllowed());
     }
@@ -202,11 +198,13 @@ public class CommandHandler {
       collector = MultiCollector.wrap(collector, hitCountCollector);
     }
 
+	/* TODO [Greg]: Needs to be implemented !
     Filter luceneFilter = filter.filter;
     if (filter.postFilter != null) {
       filter.postFilter.setLastDelegate(collector);
       collector = filter.postFilter;
     }
+	*/
 
     try {
       searcher.search(query, luceneFilter, collector);

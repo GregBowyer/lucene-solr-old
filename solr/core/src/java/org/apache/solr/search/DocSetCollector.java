@@ -17,7 +17,6 @@ package org.apache.solr.search;
  * limitations under the License.
  */
 
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.Scorer;
@@ -26,9 +25,9 @@ import org.apache.lucene.util.OpenBitSet;
 import java.io.IOException;
 
 /**
- *
+ * Simple collector that is responsible for colating the underlying docsets found in
+ * a given query
  */
-
 public class DocSetCollector extends Collector {
   int pos=0;
   OpenBitSet bits;

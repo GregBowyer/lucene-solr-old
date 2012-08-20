@@ -25,6 +25,7 @@ import org.apache.lucene.index.ReaderUtil;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FieldComparator;
+import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Sort;
@@ -52,6 +53,7 @@ import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.DocListAndSet;
 import org.apache.solr.search.DocSlice;
+import org.apache.solr.search.FilterBuilder;
 import org.apache.solr.search.Grouping;
 import org.apache.solr.search.QParser;
 import org.apache.solr.search.QParserPlugin;
@@ -150,23 +152,8 @@ public class QueryComponent extends SearchComponent
       rb.setScoreDoc(parser.getPaging());
       
       String[] fqs = req.getParams().getParams(CommonParams.FQ);
-      if (fqs!=null && fqs.length!=0) {
-        List<Query> filters = rb.getFilters();
-        // if filters already exists, make a copy instead of modifying the original
-        filters = filters == null ? new ArrayList<Query>(fqs.length) : new ArrayList<Query>(filters);
-        for (String fq : fqs) {
-          if (fq != null && fq.trim().length()!=0) {
-            QParser fqp = QParser.getParser(fq, null, req);
-            filters.add(fqp.getQuery());
-          }
-        }
-        // only set the filters if they are not empty otherwise
-        // fq=&someotherParam= will trigger all docs filter for every request 
-        // if filter cache is disabled
-        if (!filters.isEmpty()) {
-          rb.setFilters( filters );
-        }
-      }
+      Filter filter = FilterBuilder.getFilterBuilder(req, fqs).getFilter();
+      rb.setFilter(filter);
     } catch (SyntaxError e) {
       throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, e);
     }
@@ -262,13 +249,10 @@ public class QueryComponent extends SearchComponent
 
       DocListAndSet res = new DocListAndSet();
       res.docList = new DocSlice(0, docs, luceneIds, null, docs, 0);
+
       if (rb.isNeedDocSet()) {
         // TODO: create a cache for this!
-        List<Query> queries = new ArrayList<Query>();
-        queries.add(rb.getQuery());
-        List<Query> filters = rb.getFilters();
-        if (filters != null) queries.addAll(filters);
-        res.docSet = searcher.getDocSet(queries);
+        res.docSet = searcher.getDocSet(rb.getQuery());
       }
       rb.setResults(res);
       
@@ -786,8 +770,7 @@ public class QueryComponent extends SearchComponent
 
       // Merge the docs via a priority queue so we don't have to sort *all* of the
       // documents... we only need to order the top (rows+start)
-      ShardFieldSortedHitQueue queue;
-      queue = new ShardFieldSortedHitQueue(sortFields, ss.getOffset() + ss.getCount());
+      ShardFieldSortedHitQueue queue = new ShardFieldSortedHitQueue(sortFields, ss.getOffset() + ss.getCount());
 
       NamedList<Object> shardInfo = null;
       if(rb.req.getParams().getBool(ShardParams.SHARDS_INFO, false)) {

@@ -67,6 +67,7 @@ import org.apache.solr.schema.TrieField;
 import org.apache.solr.search.BitDocSet;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocSet;
+import org.apache.solr.search.FilterBuilder;
 import org.apache.solr.search.Grouping;
 import org.apache.solr.search.HashDocSet;
 import org.apache.solr.search.QParser;
@@ -99,6 +100,9 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
 /**
  * A class that generates simple Facet information for a request.
@@ -184,9 +188,9 @@ public class SimpleFacets {
 
     Map<?,?> tagMap = (Map<?,?>)req.getContext().get("tags");
     if (tagMap != null && rb != null) {
-      List<String> excludeTagList = StrUtils.splitSmart(excludeStr,',');
+      Set<String> excludeTagList = ImmutableSet.copyOf(StrUtils.splitSmart(excludeStr, ','));
 
-      IdentityHashMap<Query,Boolean> excludeSet = new IdentityHashMap<Query,Boolean>();
+      Map<Query,Boolean> excludeSet = new IdentityHashMap<Query,Boolean>();
       for (String excludeTag : excludeTagList) {
         Object olst = tagMap.get(excludeTag);
         // tagMap has entries of List<String,List<QParser>>, but subject to change in the future
@@ -199,24 +203,43 @@ public class SimpleFacets {
       }
       if (excludeSet.size() == 0) return;
 
-      List<Query> qlist = new ArrayList<Query>();
+      boolean excludeMainQuery = excludeSet.containsKey(rb.getQuery());
+      Query query = excludeMainQuery ? new MatchAllDocsQuery() : rb.getQuery();
+      Filter filter = null;
 
-      // add the base query
-      if (!excludeSet.containsKey(rb.getQuery())) {
-        qlist.add(rb.getQuery());
-      }
+      // TODO [Greg] this is fugly
+      // HACK  HACK  HACK  HACK  HACK  HACK  HACK  HACK  HACK  HACK  
+      //-----------------------------------------------------------
+      String[] rawFQs = params.getParams(CommonParams.FQ);
+      if (rawFQs != null && rawFQs.length > 0) {
+        List<Query> filterQueries = new ArrayList<Query>(rawFQs.length);
+        for (String rawFQ : rawFQs) {
+          QParser parser = QParser.getParser(rawFQ.trim(), null, req);
+          if (parser.getQuery() == null)
+            continue;
 
-      // add the filters
-      if (rb.getFilters() != null) {
-        for (Query q : rb.getFilters()) {
-          if (!excludeSet.containsKey(q)) {
-            qlist.add(q);
+          boolean allowedFQ = true;
+          SolrParams fqLocalParams = parser.getLocalParams();
+          if (fqLocalParams != null && fqLocalParams.get("tag") != null) {
+            Set<String> fqTags = ImmutableSet.copyOf(StrUtils.splitSmart(fqLocalParams.get("tag"), ','));
+            allowedFQ = Sets.intersection(excludeTagList, fqTags).isEmpty();
           }
+          if (allowedFQ) {
+            filterQueries.add(parser.getQuery());
         }
       }
+        if (excludeMainQuery && filterQueries.size() == 1) {
+          query = filterQueries.get(0);
+          filter = null;
+        } else {
+          filter = FilterBuilder.getFilterBuilder(req, filterQueries).getFilter();
+        }
+      }
+      //-----------------------------------------------------------
+      // HACK  HACK  HACK  HACK  HACK  HACK  HACK  HACK  HACK  HACK  
 
       // get the new base docset for this facet
-      DocSet base = searcher.getDocSet(qlist);
+      DocSet base = searcher.getDocSet(query, filter);
       if (rb.grouping() && rb.getGroupingSpec().isTruncateGroups()) {
         Grouping grouping = new Grouping(searcher, null, rb.getQueryCommand(), false, 0, false);
         grouping.setGroupSort(rb.getGroupingSpec().getSortWithinGroup());

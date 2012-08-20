@@ -18,6 +18,8 @@ package org.apache.lucene.search;
  */
 
 import java.io.IOException;
+import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.lucene.analysis.MockAnalyzer;
 import org.apache.lucene.document.Document;
@@ -148,7 +150,9 @@ public class TestCachingWrapperFilter extends LuceneTestCase {
     IndexReader reader = SlowCompositeReaderWrapper.wrap(DirectoryReader.open(dir));
     AtomicReaderContext context = (AtomicReaderContext) reader.getContext();
     MockFilter filter = new MockFilter();
-    CachingWrapperFilter cacher = new CachingWrapperFilter(filter);
+    CachingWrapperFilter cacher = random().nextBoolean() ?
+        new CachingWrapperFilter(filter) :
+        new CachingWrapperFilter(filter, new FilterCache.SimpleCache());
 
     // first time, nested filter is called
     DocIdSet strongRef = cacher.getDocIdSet(context, context.reader().getLiveDocs());

@@ -37,13 +37,25 @@ import org.apache.lucene.util.WAH8DocIdSet;
  */
 public class CachingWrapperFilter extends Filter {
   private final Filter filter;
-  private final Map<Object,DocIdSet> cache = Collections.synchronizedMap(new WeakHashMap<Object,DocIdSet>());
+  private final FilterCache cache;
+
+  //private final Map<Object,DocIdSet> cache = Collections.synchronizedMap(new WeakHashMap<Object,DocIdSet>());
 
   /** Wraps another filter's result and caches it.
    * @param filter Filter to cache results of
    */
   public CachingWrapperFilter(Filter filter) {
     this.filter = filter;
+    this.cache = new FilterCache.SimpleCache();
+  }
+
+  /** Wraps another filter's result and caches it
+   * @param filter Filter to cache results of
+   * @param cache The filter cache to use
+   */
+  public CachingWrapperFilter(Filter filter, FilterCache cache) {
+    this.filter = filter;
+    this.cache = cache;
   }
 
   /**
@@ -99,14 +111,14 @@ public class CachingWrapperFilter extends Filter {
     final AtomicReader reader = context.reader();
     final Object key = reader.getCoreCacheKey();
 
-    DocIdSet docIdSet = cache.get(key);
+    DocIdSet docIdSet = cache.get(key, this.filter);
     if (docIdSet != null) {
       hitCount++;
     } else {
       missCount++;
       docIdSet = docIdSetToCache(filter.getDocIdSet(context, null), reader);
       assert docIdSet.isCacheable();
-      cache.put(key, docIdSet);
+      cache.put(key, this.filter, docIdSet);
     }
 
     return docIdSet == EMPTY_DOCIDSET ? null : BitsFilteredDocIdSet.wrap(docIdSet, acceptDocs);
@@ -151,18 +163,6 @@ public class CachingWrapperFilter extends Filter {
 
   /** Returns total byte size used by cached filters. */
   public long sizeInBytes() {
-
-    // Sync only to pull the current set of values:
-    List<DocIdSet> docIdSets;
-    synchronized(cache) {
-      docIdSets = new ArrayList<DocIdSet>(cache.values());
-    }
-
-    long total = 0;
-    for(DocIdSet dis : docIdSets) {
-      total += RamUsageEstimator.sizeOf(dis);
-    }
-
-    return total;
+    return cache.sizeInBytes();
   }
 }

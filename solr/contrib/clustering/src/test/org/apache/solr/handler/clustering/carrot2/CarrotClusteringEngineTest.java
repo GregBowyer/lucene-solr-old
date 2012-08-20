@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
@@ -463,8 +464,7 @@ public class CarrotClusteringEngineTest extends AbstractClusteringTestCase {
     DocList docList;
     try {
       SolrIndexSearcher searcher = ref.get();
-      docList = searcher.getDocList(query, (Query) null, new Sort(), 0,
-              numberOfDocs);
+      docList = searcher.getDocList(query, (Filter) null, new Sort(), 0, numberOfDocs);
       assertEquals("docList size", expectedNumDocs, docList.matches());
 
       ModifiableSolrParams solrParams = new ModifiableSolrParams();

@@ -73,7 +73,6 @@ public class ValueSourceRangeFilter extends SolrFilter {
   }
 
 
-  @Override
   public DocIdSet getDocIdSet(final Map context, final AtomicReaderContext readerContext, Bits acceptDocs) throws IOException {
      return BitsFilteredDocIdSet.wrap(new DocIdSet() {
        @Override
@@ -87,7 +86,6 @@ public class ValueSourceRangeFilter extends SolrFilter {
      }, acceptDocs);
   }
 
-  @Override
   public void createWeight(Map context, IndexSearcher searcher) throws IOException {
     valueSource.createWeight(context, searcher);
   }
@@ -130,5 +128,10 @@ public class ValueSourceRangeFilter extends SolrFilter {
     h += (includeLower ? 0xdaa47978 : 0)
     + (includeUpper ? 0x9e634b57 : 0);
     return h;
+  }
+
+  @Override
+  public DocIdSet getDocIdSet(AtomicReaderContext context, Bits acceptDocs) throws IOException {
+    return getDocIdSet(null, context, acceptDocs);
   }
 }
