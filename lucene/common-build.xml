@@ -852,6 +852,11 @@
             <!-- Temporary directory in the cwd. -->
             <sysproperty key="tempDir" value="."/>
 
+            <!-- Restrict file modify access to build dir only and install security manager -->
+            <sysproperty key="tests.sandbox.dir" value="${build.dir}" />
+            <sysproperty key="java.security.manager" value="" />
+            <sysproperty key="java.security.policy" value="${common.dir}/tools/junit4/tests.policy" />
+
             <sysproperty key="lucene.version" value="${dev.version}"/>
 
             <sysproperty key="jetty.testMode" value="1"/>
