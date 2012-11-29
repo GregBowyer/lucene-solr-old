@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * Update handler which uses the JavaBin format
@@ -68,10 +69,11 @@ public class JavabinLoader extends ContentStreamLoader {
 
       @Override
       public void update(SolrInputDocument document, UpdateRequest updateRequest) {
+        Map<String, String> userCommitData = updateRequest.getUserCommitData();
         if (document == null) {
           // Perhaps commit from the parameters
           try {
-            RequestHandlerUtils.handleCommit(req, processor, updateRequest.getParams(), false);
+            RequestHandlerUtils.handleCommit(req, userCommitData, processor, updateRequest.getParams(), false);
             RequestHandlerUtils.handleRollback(req, processor, updateRequest.getParams(), false);
           } catch (IOException e) {
             throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "ERROR handling commit/rollback");
@@ -79,7 +81,7 @@ public class JavabinLoader extends ContentStreamLoader {
           return;
         }
         if (addCmd == null) {
-          addCmd = getAddCommand(req, updateRequest.getParams());
+          addCmd = getAddCommand(req, updateRequest.getParams(), userCommitData);
         }
         addCmd.solrDoc = document;
         try {
@@ -103,9 +105,8 @@ public class JavabinLoader extends ContentStreamLoader {
     }
   }
 
-  private AddUpdateCommand getAddCommand(SolrQueryRequest req, SolrParams params) {
-    AddUpdateCommand addCmd = new AddUpdateCommand(req);
-
+  private AddUpdateCommand getAddCommand(SolrQueryRequest req, SolrParams params, Map<String, String> userCommitData) {
+    AddUpdateCommand addCmd = new AddUpdateCommand(req, userCommitData);
     addCmd.overwrite = params.getBool(UpdateParams.OVERWRITE, true);
     addCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, -1);
     return addCmd;
@@ -113,7 +114,7 @@ public class JavabinLoader extends ContentStreamLoader {
 
   private void delete(SolrQueryRequest req, UpdateRequest update, UpdateRequestProcessor processor) throws IOException {
     SolrParams params = update.getParams();
-    DeleteUpdateCommand delcmd = new DeleteUpdateCommand(req);
+    DeleteUpdateCommand delcmd = new DeleteUpdateCommand(req, update.getUserCommitData());
     if(params != null) {
       delcmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, -1);
     }

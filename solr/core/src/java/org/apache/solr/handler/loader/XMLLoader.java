@@ -204,7 +204,9 @@ public class XMLLoader extends ContentStreamLoader {
   void processUpdate(SolrQueryRequest req, UpdateRequestProcessor processor, XMLStreamReader parser)
           throws XMLStreamException, IOException, FactoryConfigurationError {
     AddUpdateCommand addCmd = null;
+    Map<String, String> userCommitData = new HashMap<String, String>();
     SolrParams params = req.getParams();
+
     while (true) {
       int event = parser.next();
       switch (event) {
@@ -214,10 +216,13 @@ public class XMLLoader extends ContentStreamLoader {
 
         case XMLStreamConstants.START_ELEMENT:
           String currTag = parser.getLocalName();
-          if (currTag.equals(UpdateRequestHandler.ADD)) {
+          if (currTag.equals(UpdateRequestHandler.USER_COMMIT_DATA)) {
+            userCommitData = readUserCommitData(parser);
+          }
+          else if (currTag.equals(UpdateRequestHandler.ADD)) {
             log.trace("SolrCore.update(add)");
 
-            addCmd = new AddUpdateCommand(req);
+            addCmd = new AddUpdateCommand(req, userCommitData);
 
             // First look for commitWithin parameter on the request, will be overwritten for individual <add>'s
             addCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, -1);
@@ -247,7 +252,7 @@ public class XMLLoader extends ContentStreamLoader {
           } else if (UpdateRequestHandler.COMMIT.equals(currTag) || UpdateRequestHandler.OPTIMIZE.equals(currTag)) {
             log.trace("parsing " + currTag);
 
-            CommitUpdateCommand cmd = new CommitUpdateCommand(req, UpdateRequestHandler.OPTIMIZE.equals(currTag));
+            CommitUpdateCommand cmd = new CommitUpdateCommand(req, userCommitData, UpdateRequestHandler.OPTIMIZE.equals(currTag));
             ModifiableSolrParams mp = new ModifiableSolrParams();
             
             for (int i = 0; i < parser.getAttributeCount(); i++) {
@@ -271,7 +276,7 @@ public class XMLLoader extends ContentStreamLoader {
           } // end rollback
           else if (UpdateRequestHandler.DELETE.equals(currTag)) {
             log.trace("parsing delete");
-            processDelete(req, processor, parser);
+            processDelete(req, userCommitData, processor, parser);
           } // end delete
           break;
       }
@@ -281,9 +286,9 @@ public class XMLLoader extends ContentStreamLoader {
   /**
    * @since solr 1.3
    */
-  void processDelete(SolrQueryRequest req, UpdateRequestProcessor processor, XMLStreamReader parser) throws XMLStreamException, IOException {
+  void processDelete(SolrQueryRequest req, Map<String, String> userCommitData, UpdateRequestProcessor processor, XMLStreamReader parser) throws XMLStreamException, IOException {
     // Parse the command
-    DeleteUpdateCommand deleteCmd = new DeleteUpdateCommand(req);
+    DeleteUpdateCommand deleteCmd = new DeleteUpdateCommand(req, userCommitData);
 
     // First look for commitWithin parameter on the request, will be overwritten for individual <delete>'s
     SolrParams params = req.getParams();
@@ -354,6 +359,55 @@ public class XMLLoader extends ContentStreamLoader {
     }
   }
 
+  /**
+   * Given the parser, read in any userCommitData
+   */
+  public Map<String, String> readUserCommitData(XMLStreamReader parser) throws XMLStreamException {
+    Map<String, String> userCommitData = new HashMap<String, String>();
+
+    String name = "";
+    StringBuilder value = new StringBuilder();
+
+    while(true) {
+      int event = parser.next();
+      switch (event) {
+        case XMLStreamConstants.SPACE:
+        case XMLStreamConstants.CDATA:
+        case XMLStreamConstants.CHARACTERS:
+          value.append(parser.getText());
+          break;
+
+        case XMLStreamConstants.START_ELEMENT:
+          value.setLength(0);
+          String localName = parser.getLocalName();
+          if (!UpdateRequestHandler.COMMIT_DATA.equals(localName)) {
+            log.warn("unexpected XML tag userCommitData/" + localName);
+            throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
+                "unexpected XML tag doc/" + localName);
+          }
+
+          for (int i = 0; i < parser.getAttributeCount(); i++) {
+            String attrName = parser.getAttributeLocalName(i);
+            String attrVal = parser.getAttributeValue(i);
+            if ("name".equals(attrName)) {
+              name = attrVal;
+            } else {
+              log.warn("Unknown attribute doc/field/@" + attrName);
+            }
+          }
+          break;
+
+        case XMLStreamConstants.END_ELEMENT:
+          if (UpdateRequestHandler.USER_COMMIT_DATA.equals(parser.getLocalName())) {
+            return userCommitData;
+          } else if (UpdateRequestHandler.COMMIT_DATA.equals(parser.getLocalName())) {
+            userCommitData.put(name, value.toString());
+            value.setLength(0);
+          }
+          break;
+      }
+    }
+  }
 
   /**
    * Given the input stream, read a document

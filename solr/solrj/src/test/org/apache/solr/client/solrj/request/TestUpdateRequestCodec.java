@@ -16,6 +16,7 @@
  */
 package org.apache.solr.client.solrj.request;
 
+import com.google.common.collect.ImmutableMap;
 import junit.framework.Assert;
 
 import org.apache.lucene.util.LuceneTestCase;
@@ -107,6 +108,22 @@ public class TestUpdateRequestCodec extends LuceneTestCase {
                         updateRequest.getDeleteQuery().get(0));
 
     assertEquals("b", updateUnmarshalled.getParams().get("a"));
+  }
+
+  @Test
+  public void testUserCommitData() throws IOException {
+    UpdateRequest updateRequest = new UpdateRequest();
+    updateRequest.setUserCommitData(ImmutableMap.of("test", "test"));
+
+    JavaBinUpdateRequestCodec codec = new JavaBinUpdateRequestCodec();
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    codec.marshal(updateRequest, baos);
+
+    new JavaBinUpdateRequestCodec.StreamingUpdateHandler() {
+      public void update(SolrInputDocument document, UpdateRequest req) {
+        assertEquals(req.getUserCommitData().get("test"), "test");
+      }
+    }.update(null, updateRequest);
   }
 
   @Test

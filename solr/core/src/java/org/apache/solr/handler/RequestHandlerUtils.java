@@ -51,7 +51,7 @@ public class RequestHandlerUtils
    * Check the request parameters and decide if it should commit or optimize.
    * If it does, it will check other related parameters such as "waitFlush" and "waitSearcher"
    */
-  public static boolean handleCommit(SolrQueryRequest req, UpdateRequestProcessor processor, SolrParams params, boolean force ) throws IOException
+  public static boolean handleCommit(SolrQueryRequest req, Map<String, String> userCommitData, UpdateRequestProcessor processor, SolrParams params, boolean force ) throws IOException
   {
     if( params == null) {
       params = new MapSolrParams( new HashMap<String, String>() ); 
@@ -64,7 +64,7 @@ public class RequestHandlerUtils
 
 
     if( optimize || commit || softCommit || prepareCommit || force ) {
-      CommitUpdateCommand cmd = new CommitUpdateCommand(req, optimize );
+      CommitUpdateCommand cmd = new CommitUpdateCommand(req, userCommitData, optimize );
       updateCommit(cmd, params);
       processor.processCommit( cmd );
       return true;

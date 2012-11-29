@@ -41,6 +41,12 @@ import org.apache.solr.update.processor.UpdateRequestProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.*;
+
+import static java.lang.String.format;
 
 
 /**
@@ -103,6 +109,8 @@ public class JsonLoader extends ContentStreamLoader {
     void processUpdate() throws IOException
     {
       int ev = parser.nextEvent();
+      Map<String, String> userCommitData = null;
+
       while( ev != JSONParser.EOF ) {
         
         switch( ev )
@@ -114,10 +122,13 @@ public class JsonLoader extends ContentStreamLoader {
         case JSONParser.STRING:
           if( parser.wasKey() ) {
             String v = parser.getString();
-            if( v.equals( UpdateRequestHandler.ADD ) ) {
+            if (v.equals(UpdateRequestHandler.USER_COMMIT_DATA)) {
+              userCommitData = parseUserCommitData();
+            }
+            else if( v.equals( UpdateRequestHandler.ADD ) ) {
               int ev2 = parser.nextEvent();
               if (ev2 == JSONParser.OBJECT_START) {
-                processor.processAdd( parseAdd() );
+                processor.processAdd(parseAdd(userCommitData));
               } else if (ev2 == JSONParser.ARRAY_START) {
                 handleAdds();
               } else {
@@ -125,19 +136,19 @@ public class JsonLoader extends ContentStreamLoader {
               }
             }
             else if( v.equals( UpdateRequestHandler.COMMIT ) ) {
-              CommitUpdateCommand cmd = new CommitUpdateCommand(req,  false );
+              CommitUpdateCommand cmd = new CommitUpdateCommand(req, userCommitData, false);
               cmd.waitSearcher = true;
               parseCommitOptions( cmd );
               processor.processCommit( cmd );
             }
             else if( v.equals( UpdateRequestHandler.OPTIMIZE ) ) {
-              CommitUpdateCommand cmd = new CommitUpdateCommand(req, true );
+              CommitUpdateCommand cmd = new CommitUpdateCommand(req, userCommitData, true);
               cmd.waitSearcher = true;
               parseCommitOptions( cmd );
               processor.processCommit( cmd );
             }
             else if( v.equals( UpdateRequestHandler.DELETE ) ) {
-              handleDeleteCommand();
+              handleDeleteCommand(userCommitData);
             }
             else if( v.equals( UpdateRequestHandler.ROLLBACK ) ) {
               processor.processRollback( parseRollback() );
@@ -171,23 +182,48 @@ public class JsonLoader extends ContentStreamLoader {
       }
     }
 
+    private Map<String, String> parseUserCommitData() throws IOException {
+      Map<String, String> toReturn = new HashMap<String, String>();
+      assertNextEvent(JSONParser.OBJECT_START);
+
+      while(true) {
+        int ev = parser.nextEvent();
+        if(ev == JSONParser.STRING) {
+          if(parser.wasKey()) {
+            String key = parser.getString();
+            assertNextEvent(JSONParser.STRING);
+            String value = parser.getString();
+            toReturn.put(key, value);
+          } else {
+            throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
+                "Should be a key at ["+parser.getPosition()+"]" );
+          }
+        } else if(ev == JSONParser.OBJECT_END) {
+          return toReturn;
+        } else {
+          throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, format("Got: %s at [%d]",
+              JSONParser.getEventString(ev), parser.getPosition()));
+        }
+      }
+    }
+
     //
     // "delete":"id"
     // "delete":["id1","id2"]
     // "delete":{"id":"foo"}
     // "delete":{"query":"myquery"}
     //
-    void handleDeleteCommand() throws IOException {
+    void handleDeleteCommand(Map<String, String> userCommitData) throws IOException {
       int ev = parser.nextEvent();
       switch (ev) {
         case JSONParser.ARRAY_START:
-          handleDeleteArray(ev);
+          handleDeleteArray(ev, userCommitData);
           break;
         case JSONParser.OBJECT_START:
-          handleDeleteMap(ev);
+          handleDeleteMap(ev, userCommitData);
           break;
         default:
-          handleSingleDelete(ev);
+          handleSingleDelete(ev, userCommitData);
       }
     }
 
@@ -212,11 +248,11 @@ public class JsonLoader extends ContentStreamLoader {
     }
 
 
-    void handleSingleDelete(int ev) throws IOException {
+    void handleSingleDelete(int ev, Map<String, String> userCommitData) throws IOException {
       if (ev == JSONParser.OBJECT_START) {
-        handleDeleteMap(ev);
+        handleDeleteMap(ev, userCommitData);
       } else {
-        DeleteUpdateCommand cmd = new DeleteUpdateCommand(req);
+        DeleteUpdateCommand cmd = new DeleteUpdateCommand(req, userCommitData);
         cmd.commitWithin = commitWithin;
         String id = getString(ev);
         cmd.setId(id);
@@ -224,19 +260,19 @@ public class JsonLoader extends ContentStreamLoader {
       }
     }
 
-    void handleDeleteArray(int ev) throws IOException {
+    void handleDeleteArray(int ev, Map<String, String> userCommitData) throws IOException {
       assert ev == JSONParser.ARRAY_START;
       for (;;) {
         ev = parser.nextEvent();
         if (ev == JSONParser.ARRAY_END) return;
-        handleSingleDelete(ev);
+        handleSingleDelete(ev, userCommitData);
       }
     }
 
-    void handleDeleteMap(int ev) throws IOException {
+    void handleDeleteMap(int ev, Map<String, String> userCommitData) throws IOException {
       assert ev == JSONParser.OBJECT_START;
 
-      DeleteUpdateCommand cmd = new DeleteUpdateCommand(req);
+      DeleteUpdateCommand cmd = new DeleteUpdateCommand(req, userCommitData);
       cmd.commitWithin = commitWithin;
 
       while( true ) {
@@ -287,7 +323,7 @@ public class JsonLoader extends ContentStreamLoader {
       return new RollbackUpdateCommand(req);
     }
   
-    void parseCommitOptions(CommitUpdateCommand cmd ) throws IOException
+    void parseCommitOptions(CommitUpdateCommand cmd) throws IOException
     {
       assertNextEvent( JSONParser.OBJECT_START );
       final Map<String,Object> map = (Map)ObjectBuilder.getVal(parser);
@@ -316,9 +352,9 @@ public class JsonLoader extends ContentStreamLoader {
       RequestHandlerUtils.updateCommit(cmd, p);
     }
     
-    AddUpdateCommand parseAdd() throws IOException
+    AddUpdateCommand parseAdd(Map<String, String> userCommitData) throws IOException
     {
-      AddUpdateCommand cmd = new AddUpdateCommand(req);
+      AddUpdateCommand cmd = new AddUpdateCommand(req, userCommitData);
       cmd.commitWithin = commitWithin;
       cmd.overwrite = overwrite;
   

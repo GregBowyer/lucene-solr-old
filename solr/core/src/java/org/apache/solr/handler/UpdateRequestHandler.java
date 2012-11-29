@@ -52,6 +52,8 @@ public class UpdateRequestHandler extends ContentStreamHandlerBase {
   public static final String DELETE = "delete";
   public static final String OPTIMIZE = "optimize";
   public static final String COMMIT = "commit";
+  public static final String USER_COMMIT_DATA = "userCommitData";
+  public static final String COMMIT_DATA = "commitData";
   public static final String ROLLBACK = "rollback";
   public static final String WAIT_SEARCHER = "waitSearcher";
   public static final String SOFT_COMMIT = "softCommit";

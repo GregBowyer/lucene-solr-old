@@ -341,7 +341,7 @@ public class FileFloatSource extends ValueSource {
       UpdateRequestProcessor processor =
         req.getCore().getUpdateProcessingChain(null).createProcessor(req, rsp);
       try{
-        RequestHandlerUtils.handleCommit(req, processor, req.getParams(), true);
+        RequestHandlerUtils.handleCommit(req, null, processor, req.getParams(), true);
       }
       finally{
         processor.finish();

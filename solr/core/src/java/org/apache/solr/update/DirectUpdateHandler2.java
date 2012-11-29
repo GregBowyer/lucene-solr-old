@@ -230,6 +230,10 @@ public class DirectUpdateHandler2 extends UpdateHandler implements SolrCoreState
         }
         
         if ((cmd.getFlags() & UpdateCommand.IGNORE_AUTOCOMMIT) == 0) {
+          if (cmd.userCommitData != null) {
+            commitTracker.setAutoCommitUserData(cmd.userCommitData);
+          }
+
           commitTracker.addedDocument(-1);
           softCommitTracker.addedDocument(cmd.commitWithin);
         }
@@ -253,6 +257,10 @@ public class DirectUpdateHandler2 extends UpdateHandler implements SolrCoreState
   
   private void updateDeleteTrackers(DeleteUpdateCommand cmd) {
     if ((cmd.getFlags() & UpdateCommand.IGNORE_AUTOCOMMIT) == 0) {
+      if (cmd.userCommitData != null) {
+        commitTracker.setAutoCommitUserData(cmd.userCommitData);
+      }
+
       softCommitTracker.deletedDocument(cmd.commitWithin);
       
       if (commitTracker.getTimeUpperBound() > 0) {
@@ -450,6 +458,9 @@ public class DirectUpdateHandler2 extends UpdateHandler implements SolrCoreState
         final Map<String,String> commitData = new HashMap<String,String>();
         commitData.put(SolrIndexWriter.COMMIT_TIME_MSEC_KEY,
             String.valueOf(System.currentTimeMillis()));
+        if (cmd.userCommitData != null) {
+          commitData.putAll(cmd.userCommitData);
+        }
         iw.get().setCommitData(commitData);
         iw.get().prepareCommit();
       } finally {
@@ -526,8 +537,7 @@ public class DirectUpdateHandler2 extends UpdateHandler implements SolrCoreState
           final Map<String,String> commitData = new HashMap<String,String>();
           commitData.put(SolrIndexWriter.COMMIT_TIME_MSEC_KEY,
               String.valueOf(System.currentTimeMillis()));
-          writer.setCommitData(commitData);
-          writer.commit();
+          writer.commit(commitData);
           // SolrCore.verbose("writer.commit() end");
           numDocsPending.set(0);
           callPostCommitCallbacks();
@@ -709,8 +719,7 @@ public class DirectUpdateHandler2 extends UpdateHandler implements SolrCoreState
           // todo: refactor this shared code (or figure out why a real CommitUpdateCommand can't be used)
           final Map<String,String> commitData = new HashMap<String,String>();
           commitData.put(SolrIndexWriter.COMMIT_TIME_MSEC_KEY, String.valueOf(System.currentTimeMillis()));
-          writer.setCommitData(commitData);
-          writer.commit();
+          writer.commit(commitData);
 
           synchronized (solrCoreState.getUpdateLock()) {
             ulog.postCommit(cmd);

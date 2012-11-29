@@ -27,6 +27,8 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 
+import java.util.Map;
+
 /**
  *
  */
@@ -45,9 +47,13 @@ public class AddUpdateCommand extends UpdateCommand {
 
    public int commitWithin = -1;
    
-   public AddUpdateCommand(SolrQueryRequest req) {
-     super(req);
-   }
+  public AddUpdateCommand(SolrQueryRequest req) {
+    super(req);
+  }
+
+  public AddUpdateCommand(SolrQueryRequest req, Map<String, String> userCommitData) {
+    super(req, userCommitData);
+  }
 
   @Override
   public String name() {

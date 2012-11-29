@@ -16,6 +16,7 @@
  */
 package org.apache.solr.handler;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.client.solrj.impl.BinaryRequestWriter;
 import org.apache.solr.client.solrj.request.UpdateRequest;
@@ -63,4 +64,29 @@ public class BinaryUpdateRequestHandlerTest extends SolrTestCaseJ4 {
 
     req.close();
   }
+
+  @Test
+  public void testUserCommitData() throws Exception {
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.addField("id", "1");
+
+    UpdateRequest updateRequest = new UpdateRequest();
+    updateRequest.setUserCommitData(ImmutableMap.of("test", "testvalue"));
+    updateRequest.add(doc);
+
+    BinaryRequestWriter brw = new BinaryRequestWriter();
+    BufferingRequestProcessor p = new BufferingRequestProcessor(null);
+    SolrQueryResponse rsp = new SolrQueryResponse();
+    UpdateRequestHandler handler = new UpdateRequestHandler();
+    handler.init(new NamedList());
+    SolrQueryRequest req = req();
+    ContentStreamLoader csl = handler.newLoader(req, p);
+
+    csl.load(req, rsp, brw.getContentStream(updateRequest), p);
+
+    AddUpdateCommand add = p.addCommands.get(0);
+    assertEquals(add.userCommitData.get("test"), "testvalue");
+    req.close();
+  }
+
 }

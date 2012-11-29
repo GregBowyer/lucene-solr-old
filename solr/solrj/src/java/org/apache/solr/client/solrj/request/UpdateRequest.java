@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
@@ -145,6 +146,15 @@ public class UpdateRequest extends AbstractUpdateRequest {
    * @since solr 1.4
    */
   public void writeXML( Writer writer ) throws IOException {
+    if (!(userCommitData == null || userCommitData.isEmpty())) {
+      writer.write("<userCommitData>");
+      //TODO - we should escape none xml strings
+      for (Map.Entry<String, String> commitData : userCommitData.entrySet()) {
+        writer.write("<data name=\"" + commitData.getKey() + "\">" + commitData.getValue() + "</data>");
+      }
+      writer.write("</userCommitData>");
+    }
+
     if( (documents != null && documents.size() > 0) || docIterator != null) {
       if( commitWithin > 0 ) {
         writer.write("<add commitWithin=\""+commitWithin+"\">");

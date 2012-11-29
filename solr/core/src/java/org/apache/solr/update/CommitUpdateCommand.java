@@ -19,6 +19,8 @@ package org.apache.solr.update;
 
 import org.apache.solr.request.SolrQueryRequest;
 
+import java.util.Map;
+
 /**
  *
  */
@@ -42,6 +44,11 @@ public class CommitUpdateCommand extends UpdateCommand {
     this.optimize=optimize;
   }
 
+  public CommitUpdateCommand(SolrQueryRequest req, Map<String, String> userCommitData, boolean optimize) {
+    super(req, userCommitData);
+    this.optimize=optimize;
+  }
+
   @Override
   public String name() {
     return "commit";
@@ -54,6 +61,7 @@ public class CommitUpdateCommand extends UpdateCommand {
             +",waitSearcher="+waitSearcher
             +",expungeDeletes="+expungeDeletes
             +",softCommit="+softCommit
+            +",userCommitData="+ userCommitData
             +'}';
   }
 }

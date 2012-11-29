@@ -20,6 +20,8 @@ package org.apache.solr.update;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.request.SolrQueryRequest;
 
+import java.util.Map;
+
 
 /** An index update command encapsulated in an object (Command pattern)
  *
@@ -36,8 +38,15 @@ public abstract class UpdateCommand implements Cloneable {
   public static int IGNORE_AUTOCOMMIT = 0x00000008; // this update should not count toward triggering of autocommits.
   public static int CLEAR_CACHES = 0x00000010; // clear caches associated with the update log.  used when applying reordered DBQ updates when doing an add.
 
+  public Map<String, String> userCommitData = null;
+
   public UpdateCommand(SolrQueryRequest req) {
     this.req = req;
+  }
+
+  public UpdateCommand(SolrQueryRequest req, Map<String, String> userCommitData) {
+    this.req = req;
+    this.userCommitData = userCommitData;
   }
 
   public abstract String name();

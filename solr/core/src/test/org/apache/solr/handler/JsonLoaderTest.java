@@ -17,6 +17,7 @@
 
 package org.apache.solr.handler;
 
+import com.google.common.base.Joiner;
 import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
@@ -298,5 +299,26 @@ public class JsonLoaderTest extends SolrTestCaseJ4 {
     req.close();
   }
 
+  @Test
+  public void testParseUserCommitData() throws Exception {
+    String str = Joiner.on("\n").join("{" +
+      "'userCommitData': {",
+        "'key1': 'value1',",
+        "'key2': 'value2'",
+      "},",
+      "'commit': {}" +
+    "}");
+    str = str.replace('\'', '"');
+
+    SolrQueryRequest req = req();
+    SolrQueryResponse rsp = new SolrQueryResponse();
+    BufferingRequestProcessor p = new BufferingRequestProcessor(null);
+    JsonLoader loader = new JsonLoader();
+    loader.load(req, rsp, new ContentStreamBase.StringStream(str), p);
+
+    CommitUpdateCommand commit = p.commitCommands.get(0);
+    assertEquals(commit.userCommitData.get("key1"), "value1");
+    assertEquals(commit.userCommitData.get("key2"), "value2");
+  }
 
 }

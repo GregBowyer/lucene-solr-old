@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 
 public class XmlUpdateRequestHandlerTest extends SolrTestCaseJ4 {
@@ -59,7 +60,7 @@ public class XmlUpdateRequestHandlerTest extends SolrTestCaseJ4 {
   @Test
   public void testReadDoc() throws Exception
   {
-    String xml = 
+    XMLStreamReader parser = createParser(
       "<doc boost=\"5.5\">" +
       "  <field name=\"id\" boost=\"2.2\">12345</field>" +
       "  <field name=\"name\">kitten</field>" +
@@ -67,11 +68,8 @@ public class XmlUpdateRequestHandlerTest extends SolrTestCaseJ4 {
       "  <field name=\"cat\" boost=\"4\">bbb</field>" +
       "  <field name=\"cat\" boost=\"5\">bbb</field>" +
       "  <field name=\"ab\">a&amp;b</field>" +
-      "</doc>";
+      "</doc>");
 
-    XMLStreamReader parser = 
-      inputFactory.createXMLStreamReader( new StringReader( xml ) );
-    parser.next(); // read the START document...
     //null for the processor is all right here
     XMLLoader loader = new XMLLoader();
     SolrInputDocument doc = loader.readDoc( parser );
@@ -91,6 +89,27 @@ public class XmlUpdateRequestHandlerTest extends SolrTestCaseJ4 {
     Collection<Object> out = doc.getField( "cat" ).getValues();
     assertEquals( 3, out.size() );
     assertEquals( "[aaa, bbb, bbb]", out.toString() );
+  }
+
+  private static XMLStreamReader createParser(String xml) throws Exception {
+    XMLStreamReader parser = inputFactory.createXMLStreamReader(new StringReader(xml));
+    parser.next();
+    return parser;
+  }
+
+  @Test
+  public void testReadMetadata() throws Exception {
+    XMLStreamReader parser = createParser(
+      "<userCommitData>" +
+        "<commitData name='test'>Some-data</commitData>" +
+        "<commitData name='test2'>Some-data2</commitData>" +
+      "</userCommitData>");
+
+    XMLLoader loader = new XMLLoader();
+    Map<String, String> metadata = loader.readUserCommitData(parser);
+
+    assertEquals(metadata.get("test"), "Some-data");
+    assertEquals(metadata.get("test2"), "Some-data2");
   }
   
   @Test

@@ -62,6 +62,11 @@ public class JavaBinUpdateRequestCodec {
     }
 
     nl.add("params", params);// 0: params
+
+    if(updateRequest.userCommitData != null) {
+      nl.add("userCommitData", updateRequest.userCommitData);
+    }
+
     nl.add("delById", updateRequest.getDeleteById());
     nl.add("delByQ", updateRequest.getDeleteQuery());
     nl.add("docs", docIter);
@@ -121,19 +126,24 @@ public class JavaBinUpdateRequestCodec {
       }
 
       private List readOuterMostDocIterator(FastInputStream fis) throws IOException {
-        NamedList params = (NamedList) namedList[0].getVal(0);
+        NamedList req = namedList[0];
+        NamedList params = (NamedList) req.get("params");
+        Map<String, String> userCommitData = (Map<String, String>) req.get("userCommitData");
         updateRequest.setParams(new ModifiableSolrParams(SolrParams.toSolrParams(params)));
+        updateRequest.setUserCommitData(userCommitData);
         if (handler == null) return super.readIterator(fis);
         while (true) {
           Object o = readVal(fis);
           if (o == END_OBJ) break;
           SolrInputDocument sdoc = null;
+
           if (o instanceof List) {
             sdoc = listToSolrInputDocument((List<NamedList>) o);
           } else if (o instanceof NamedList)  {
-            UpdateRequest req = new UpdateRequest();
-            req.setParams(new ModifiableSolrParams(SolrParams.toSolrParams((NamedList) o)));
-            handler.update(null, req);
+            UpdateRequest newUpdateRequest = new UpdateRequest();
+            newUpdateRequest.setParams(new ModifiableSolrParams(SolrParams.toSolrParams((NamedList) o)));
+            newUpdateRequest.setUserCommitData(userCommitData);
+            handler.update(null, newUpdateRequest);
           } else  {
             sdoc = (SolrInputDocument) o;
           }

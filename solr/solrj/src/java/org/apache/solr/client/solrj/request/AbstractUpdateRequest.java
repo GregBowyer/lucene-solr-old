@@ -24,6 +24,7 @@ import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.UpdateParams;
 
 import java.io.IOException;
+import java.util.Map;
 
 
 /**
@@ -33,6 +34,7 @@ import java.io.IOException;
 public abstract class AbstractUpdateRequest extends SolrRequest implements IsUpdateRequest {
   protected ModifiableSolrParams params;
   protected int commitWithin = -1;
+  protected Map<String, String> userCommitData;
 
   public enum ACTION {
     COMMIT,
@@ -140,6 +142,14 @@ public abstract class AbstractUpdateRequest extends SolrRequest implements IsUpd
 
   public void setCommitWithin(int commitWithin) {
     this.commitWithin = commitWithin;
+  }
+
+  public void setUserCommitData(Map<String, String> userCommitData) {
+    this.userCommitData = userCommitData;
+  }
+
+  public Map<String, String> getUserCommitData() {
+    return userCommitData;
   }
 
 

@@ -17,13 +17,16 @@ package org.apache.solr.update;
  * limitations under the License.
  */
 
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.core.SolrCore;
@@ -58,8 +61,9 @@ public final class CommitTracker implements Runnable {
   private ScheduledFuture pending;
   
   // state
-  private AtomicLong docsSinceCommit = new AtomicLong(0);
-  private AtomicInteger autoCommitCount = new AtomicInteger(0);
+  private final AtomicLong docsSinceCommit = new AtomicLong(0);
+  private final AtomicInteger autoCommitCount = new AtomicInteger(0);
+  private final AtomicReference<Map<String, String>> autoCommitUserData = new AtomicReference<Map<String, String>>();
 
   private final SolrCore core;
 
@@ -150,6 +154,10 @@ public final class CommitTracker implements Runnable {
       pending = scheduler.schedule(this, commitMaxTime, TimeUnit.MILLISECONDS);
     }
   }
+
+  public void setAutoCommitUserData(Map<String, String> userCommitData) {
+    this.autoCommitUserData.set(ImmutableMap.copyOf(userCommitData));
+  }
   
   /**
    * Indicate that documents have been added
@@ -201,7 +209,8 @@ public final class CommitTracker implements Runnable {
     SolrQueryRequest req = new LocalSolrQueryRequest(core,
         new ModifiableSolrParams());
     try {
-      CommitUpdateCommand command = new CommitUpdateCommand(req, false);
+      Map<String, String> metadata = this.autoCommitUserData.get();
+      CommitUpdateCommand command = new CommitUpdateCommand(req, metadata, false);
       command.openSearcher = openSearcher;
       command.waitSearcher = waitSearcher;
       command.softCommit = softCommit;
