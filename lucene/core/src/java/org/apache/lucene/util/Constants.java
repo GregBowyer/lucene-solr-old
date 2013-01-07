@@ -46,6 +46,10 @@ public final class Constants {
   public static final boolean SUN_OS = OS_NAME.startsWith("SunOS");
   /** True iff running on Mac OS X */
   public static final boolean MAC_OS_X = OS_NAME.startsWith("Mac OS X");
+  /** True iff the underlying OS is a sane posix complient OS
+   * (Technically windows /is/ but it only supports a subset and not SUS so it doesnt count
+   */
+  public static final boolean POSIX = LINUX || SUN_OS || MAC_OS_X;
 
   public static final String OS_ARCH = System.getProperty("os.arch");
   public static final String OS_VERSION = System.getProperty("os.version");

@@ -45,6 +45,7 @@
       </includepath>
 
       <compilerarg value="-fPIC" />
+      <compilerarg value="-O2" />
       <linkerarg value="-lstdc++" />
     </cc>
   </target>

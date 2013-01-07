@@ -36,6 +36,42 @@
 
 // java -cp .:lib/junit-4.10.jar:./build/classes/test:./build/classes/java:./build/classes/demo -Dlucene.version=2.9-dev -DtempDir=build -ea org.junit.runner.JUnitCore org.apache.lucene.index.TestDoc
 
+const int getFD(JNIEnv *env, jobject jfd) {
+  // get int fd:
+  jclass class_fdesc = env->FindClass("java/io/FileDescriptor");
+  if (class_fdesc == NULL) {
+    return -1;
+  }
+
+  jfieldID field_fd = env->GetFieldID(class_fdesc, "fd", "I");
+  if (field_fd == NULL) {
+    return -1;
+  }
+
+  return env->GetIntField(jfd, field_fd);
+}
+
+// Make a macro ?
+const int ensure(int statement, JNIEnv *env, const char* clazz) {
+  if (!statement) {
+    jclass class_ex = env->FindClass(clazz);
+    if (class_ex == NULL) {
+      class_ex = env->FindClass("java/lang/IllegalArgumentException");
+      if (class_ex == NULL) {
+        class_ex = env->FindClass("java/lang/UnknownError");
+        if (class_ex == NULL) {
+          // What now ? give up and die !
+          env->FatalError("Unable to create exception in JNI, could not even find java.lang.UnknownError - VM in primodial state ?");
+        }
+      }
+      return 2;
+    }
+    env->ThrowNew(class_ex, strerror(errno));
+    return 1;
+  }
+  return 0;
+}
+
 #ifdef LINUX
 /*
  * Class:     org_apache_lucene_store_NativePosixUtil
@@ -177,17 +213,10 @@ extern "C"
 JNIEXPORT jlong JNICALL Java_org_apache_lucene_store_NativePosixUtil_pread(JNIEnv *env, jclass _ignore, jobject jfd, jlong pos, jobject byteBuf)
 {
   // get int fd:
-  jclass class_fdesc = env->FindClass("java/io/FileDescriptor");
-  if (class_fdesc == NULL) {
+  const int fd = getFD(env, jfd);
+  if (fd == -1) {
     return -1;
   }
-
-  jfieldID field_fd = env->GetFieldID(class_fdesc, "fd", "I");
-  if (field_fd == NULL) {
-    return -1;
-  }
-
-  const int fd = env->GetIntField(jfd, field_fd);
 
   void *p = env->GetDirectBufferAddress(byteBuf);
   if (p == NULL) {
@@ -344,3 +373,44 @@ JNIEXPORT jint JNICALL Java_org_apache_lucene_store_NativePosixUtil_madvise(JNIE
   
   return 0;
 }
+
+/*
+ * Class: org_apache_lucene_store_NativePosixUtil
+ * Method: mmap
+ * Signature: (Ljava/io/FileDescriptor)J
+ */
+extern "C"
+JNIEXPORT jlong JNICALL Java_org_apache_lucene_store_NativePosixUtil_mmap(JNIEnv *env, jclass _ignore, jobject jfd, jlong length) {
+  const int fd = getFD(env, jfd);
+  if (ensure(fd != -1, env, "java/io/IOException"))
+    return -1;
+
+  off_t offset = 0;
+  void *addr = mmap(NULL, length, PROT_READ, MAP_SHARED, fd, offset);
+  if (ensure(addr != NULL && ((size_t) addr) != -1, env, "java/io/IOException"))
+    return -1;
+
+  madvise(addr, length, MADV_SEQUENTIAL);
+
+  return (long) addr;
+}
+
+/*
+ * Class: org_apache_lucene_store_NativePosixUtil
+ * Method: munmap
+ * Signature: (Ljava/io/FileDescriptor;J)J
+ */
+extern "C"
+JNIEXPORT void JNICALL Java_org_apache_lucene_store_NativePosixUtil_munmap(JNIEnv *env, jclass _ignore, jlong addr, jlong length) {
+  ensure(!munmap((void*) addr, length), env, "java/io/IOException");
+}
+
+extern "C"
+JNIEXPORT void JNICALL Java_org_apache_lucene_store_NativePosixUtil_madvise2(JNIEnv *env, jclass _ignore, jlong addr, jlong length) {
+  long page_sz = sysconf(_SC_PAGESIZE);
+  addr = ((addr + (page_sz - 1)) / page_sz) * page_sz;
+  madvise((void*) addr, length, MADV_WILLNEED);
+  //ensure(!madvise((void*) addr, length, MADV_WILLNEED), env, "java/io/IOException");
+}
+
+/* vim: set et fenc=utf-8 ff=unix sts=4 sw=2 ts=2 : */

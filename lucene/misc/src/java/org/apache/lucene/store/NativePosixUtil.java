@@ -33,8 +33,15 @@ public final class NativePosixUtil {
   public final static int DONTNEED = 4;
   public final static int NOREUSE = 5;
 
+  private static boolean libLoaded;
+
   static {
-    System.loadLibrary("NativePosixUtil");
+    try {
+      System.loadLibrary("NativePosixUtil");
+    } catch (Exception e) {
+      libLoaded = false;
+    }
+    libLoaded = true;
   }
 
   private static native int posix_fadvise(FileDescriptor fd, long offset, long len, int advise) throws IOException;
@@ -43,11 +50,20 @@ public final class NativePosixUtil {
   public static native FileDescriptor open_direct(String filename, boolean read) throws IOException;
   public static native long pread(FileDescriptor fd, long pos, ByteBuffer byteBuf) throws IOException;
 
+  public static native long mmap(FileDescriptor fd, long length) throws IOException;
+  public static native void munmap(long address, long length) throws IOException;
+
   public static void advise(FileDescriptor fd, long offset, long len, int advise) throws IOException {
     final int code = posix_fadvise(fd, offset, len, advise);
     if (code != 0) {
       throw new RuntimeException("posix_fadvise failed code=" + code);
     }
   }
+
+  public static boolean isLibLoaded() {
+    return libLoaded;
+  }
+
+  public static native void madvise2(long l, long len);
 }
     
