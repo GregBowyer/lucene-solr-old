@@ -63,5 +63,7 @@ public final class NativePosixUtil {
   public static boolean isLibLoaded() {
     return libLoaded;
   }
+
+  public static native void madvise2(long l, long len);
 }
     

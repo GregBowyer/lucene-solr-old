@@ -26,10 +26,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
 import java.util.Iterator;
-import java.util.WeakHashMap;
 
 import static java.lang.String.format;
-import static org.apache.lucene.util.Guarantee.ensureInstanceOf;
 import static org.apache.lucene.util.Guarantee.ensureIsFalse;
 import static org.apache.lucene.util.Guarantee.ensureIsTrue;
 
@@ -81,7 +79,7 @@ public class NativePosixMMapDirectory extends FSDirectory {
     RandomAccessFile raf = null;
     try {
       raf = new RandomAccessFile(path, "r");
-      return new NativePosixMMapIndexInput(path, raf, context, false);
+      return new NativePosixMMapIndexInput(path, raf, context);
     } finally {
       if (raf != null) {
         raf.close();
@@ -105,22 +103,6 @@ public class NativePosixMMapDirectory extends FSDirectory {
     // Cached array base offset
     private static final long arrayBaseOffset = (long)unsafe.arrayBaseOffset(byte[].class);
 
-    // Idea taken from hotspot - size of bytes that where the cost of doing Unsafe.getBytes()
-    // (which is basically memcpy) is more expensive than the VM intrinsic of doing an
-    // unsafe pointer read - For us its usage is probably more that we can warn about
-    // ineffective I/O operations
-    private static final int SMALL_COPY_THRESHOLD = 6;
-
-    // Limit that is used to ensure that the JVM is able to get onto a safepoint without
-    // being locked up by calls to memcpy() this idea is taken from hotspot, although this
-    // value might want to be adjusted to change the behaviour wrt to I/O effectiveness in
-    // lucene
-    private static final long SAFEPOINT_COPY_THRESHOLD = 1024L * 1024L;
-
-    // Used to control if we want to allow the VM to memcpy() in 1MB amounts, this is for
-    // experimental testing and will probably be removed from the final version
-    private final boolean yieldForVMSafePointing;
-
     // Clones will make the VM go BOOM (SEGV) if we attempt to read bytes after the fact
     private final boolean isClone;
     private final WeakIdentityMap<NativePosixMMapIndexInput, Boolean> clones;
@@ -131,9 +113,8 @@ public class NativePosixMMapDirectory extends FSDirectory {
     private long offset;
     private volatile boolean isOpen = false;
 
-    public NativePosixMMapIndexInput(String path, RandomAccessFile file, IOContext context, boolean yieldForSafePoints) throws IOException {
+    public NativePosixMMapIndexInput(String path, RandomAccessFile file, IOContext context) throws IOException {
       super(format("NativePosixMMapIndexInput(path=%s)", path));
-      this.yieldForVMSafePointing = yieldForSafePoints;
       this.length = file.length();
 
       this.isClone = false;
@@ -151,7 +132,6 @@ public class NativePosixMMapDirectory extends FSDirectory {
     public NativePosixMMapIndexInput(NativePosixMMapIndexInput clonee) {
       super(clonee.toString());
       ensureIsTrue(clonee.isOpen, AlreadyClosedException.class);
-      this.yieldForVMSafePointing = clonee.yieldForVMSafePointing;
       this.length = clonee.length;
 
       this.clones = clonee.clones;
@@ -214,31 +194,14 @@ public class NativePosixMMapDirectory extends FSDirectory {
       ensureIsFalse(b.length < len, "Requested to copy more bytes than array allows");
       ensureIsFalse(len > this.length - this.offset, IOException.class, "Attempt to read past end of mmap area");
 
-      // checkbounds ?
       long srcAddr = trueAddress(this.offset);
-      long copyLen = len;
 
-      if (len < SMALL_COPY_THRESHOLD) {
-        // TODO - Should be logged
-        //log.warn("Small I/O copy of {} bytes, this can be inefficient", len);
-
-        for (int i=0; i < b.length; i++) {
-          b[i] = unsafe.getByte(srcAddr);
-          copyLen--;
-          srcAddr++;
-        }
-      } else {
-        long destOffset = arrayBaseOffset + destPosition;
-        while (copyLen > 0) {
-          long size = (this.yieldForVMSafePointing && length > SAFEPOINT_COPY_THRESHOLD) ?
-              SAFEPOINT_COPY_THRESHOLD : len;
-          unsafe.copyMemory(null, srcAddr, b, destOffset, size);
-          copyLen -= size;
-          srcAddr += size;
-          destOffset += size;
-        }
+      if (len > unsafe.pageSize() * 32) {
+          NativePosixUtil.madvise2(trueAddress(offset), len);
       }
 
+      long destOffset = arrayBaseOffset + destPosition;
+      unsafe.copyMemory(null, srcAddr, b, destOffset, len);
       this.offset += len;
     }
 

@@ -390,6 +390,8 @@ JNIEXPORT jlong JNICALL Java_org_apache_lucene_store_NativePosixUtil_mmap(JNIEnv
   if (ensure(addr != NULL && ((size_t) addr) != -1, env, "java/io/IOException"))
     return -1;
 
+  madvise(addr, length, MADV_SEQUENTIAL);
+
   return (long) addr;
 }
 
@@ -401,6 +403,14 @@ JNIEXPORT jlong JNICALL Java_org_apache_lucene_store_NativePosixUtil_mmap(JNIEnv
 extern "C"
 JNIEXPORT void JNICALL Java_org_apache_lucene_store_NativePosixUtil_munmap(JNIEnv *env, jclass _ignore, jlong addr, jlong length) {
   ensure(!munmap((void*) addr, length), env, "java/io/IOException");
+}
+
+extern "C"
+JNIEXPORT void JNICALL Java_org_apache_lucene_store_NativePosixUtil_madvise2(JNIEnv *env, jclass _ignore, jlong addr, jlong length) {
+  long page_sz = sysconf(_SC_PAGESIZE);
+  addr = ((addr + (page_sz - 1)) / page_sz) * page_sz;
+  madvise((void*) addr, length, MADV_WILLNEED);
+  //ensure(!madvise((void*) addr, length, MADV_WILLNEED), env, "java/io/IOException");
 }
 
 /* vim: set et fenc=utf-8 ff=unix sts=4 sw=2 ts=2 : */
