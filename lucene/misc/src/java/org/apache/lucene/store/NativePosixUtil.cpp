@@ -386,11 +386,11 @@ JNIEXPORT jlong JNICALL Java_org_apache_lucene_store_NativePosixUtil_mmap(JNIEnv
     return -1;
 
   off_t offset = 0;
-  void *addr = mmap(NULL, length, PROT_READ, MAP_SHARED, fd, offset);
+  void *addr = mmap(NULL, length, PROT_READ, MAP_PRIVATE, fd, offset);
   if (ensure(addr != NULL && ((size_t) addr) != -1, env, "java/io/IOException"))
     return -1;
 
-  madvise(addr, length, MADV_SEQUENTIAL);
+  //madvise(addr, length, MADV_SEQUENTIAL);
 
   return (long) addr;
 }
