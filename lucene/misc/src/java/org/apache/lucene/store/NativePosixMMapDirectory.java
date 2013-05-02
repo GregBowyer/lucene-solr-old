@@ -67,8 +67,8 @@ public class NativePosixMMapDirectory extends FSDirectory {
   public NativePosixMMapDirectory(File path, LockFactory lockFactory) throws IOException {
     super(path, lockFactory);
 
-    ensureIsTrue(Constants.JRE_IS_64BIT, IOException.class, "The native posix mmap directory assumes a 64bit VM");
-    ensureIsFalse(Constants.WINDOWS, IOException.class, "This directory impl is unix specific");
+    //ensureIsTrue(Constants.JRE_IS_64BIT, IOException.class, "The native posix mmap directory assumes a 64bit VM");
+    //ensureIsFalse(Constants.WINDOWS, IOException.class, "This directory impl is unix specific");
   }
 
   /** Creates an IndexInput for the file with the given name. */
@@ -131,7 +131,7 @@ public class NativePosixMMapDirectory extends FSDirectory {
 
     public NativePosixMMapIndexInput(NativePosixMMapIndexInput clonee) {
       super(clonee.toString());
-      ensureIsTrue(clonee.isOpen, AlreadyClosedException.class);
+      //ensureIsTrue(clonee.isOpen, AlreadyClosedException.class);
       this.length = clonee.length;
 
       this.clones = clonee.clones;
@@ -154,7 +154,7 @@ public class NativePosixMMapDirectory extends FSDirectory {
         // not used concurrently to a closed index input ?
         for (Iterator<NativePosixMMapIndexInput> it = this.clones.keyIterator(); it.hasNext();) {
           final NativePosixMMapIndexInput clone = it.next();
-          ensureIsTrue(clone.isClone, "Trying to indicate closure on a none clone");
+          //ensureIsTrue(clone.isClone, "Trying to indicate closure on a none clone");
           clone.isOpen = false;
         }
         this.clones.clear();
@@ -164,15 +164,15 @@ public class NativePosixMMapDirectory extends FSDirectory {
 
     @Override
     public long getFilePointer() {
-      ensureIsTrue(isOpen, AlreadyClosedException.class);
+      //ensureIsTrue(isOpen, AlreadyClosedException.class);
       return this.offset;
     }
 
     @Override
     public void seek(long pos) throws IOException {
-      ensureIsTrue(isOpen, AlreadyClosedException.class);
-      ensureIsFalse(pos < 0, IOException.class, "Attempt to make a negative seek");
-      ensureIsTrue(pos <= length, IOException.class, "Attempting to seek beyond the end of the file");
+      //ensureIsTrue(isOpen, AlreadyClosedException.class);
+      //ensureIsFalse(pos < 0, IOException.class, "Attempt to make a negative seek");
+      //ensureIsTrue(pos <= length, IOException.class, "Attempting to seek beyond the end of the file");
       this.offset = pos;
     }
 
@@ -183,22 +183,24 @@ public class NativePosixMMapDirectory extends FSDirectory {
 
     @Override
     public byte readByte() throws IOException {
-      ensureIsTrue(isOpen, AlreadyClosedException.class);
-      ensureIsFalse(this.offset >= length, IOException.class, "read past EOF");
+      //ensureIsTrue(isOpen, AlreadyClosedException.class);
+      //ensureIsFalse(this.offset >= length, IOException.class, "read past EOF");
       return unsafe.getByte(trueAddress(this.offset++));
     }
 
     @Override
     public void readBytes(final byte[] b, final int destPosition, final int len) throws IOException {
-      ensureIsTrue(isOpen, AlreadyClosedException.class);
-      ensureIsFalse(b.length < len, "Requested to copy more bytes than array allows");
-      ensureIsFalse(len > this.length - this.offset, IOException.class, "Attempt to read past end of mmap area");
+      //ensureIsTrue(isOpen, AlreadyClosedException.class);
+      //ensureIsFalse(b.length < len, "Requested to copy more bytes than array allows");
+      //ensureIsFalse(len > this.length - this.offset, IOException.class, "Attempt to read past end of mmap area");
 
       long srcAddr = trueAddress(this.offset);
 
+      /*
       if (len > unsafe.pageSize() * 32) {
           NativePosixUtil.madvise2(trueAddress(offset), len);
       }
+      */
 
       long destOffset = arrayBaseOffset + destPosition;
       unsafe.copyMemory(null, srcAddr, b, destOffset, len);
