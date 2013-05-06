@@ -201,18 +201,16 @@ public class TestPruningReader extends LuceneTestCase {
   }
   
   public void testRIDFPruning() throws Exception {
-    RAMDirectory targetDir = new RAMDirectory();
     CompositeReader topLevelReader = DirectoryReader.open(sourceDir);
     AtomicReader in = SlowCompositeReaderWrapper.wrap(topLevelReader);
     // remove only very popular terms
-    RIDFTermPruningPolicy ridf = new RIDFTermPruningPolicy(in, null, null, -0.12);
+    RIDFTermPruningPolicy ridf = new RIDFTermPruningPolicy(in, null, null, -0.07);
     PruningAtomicReader tfr = new PruningAtomicReader(in, null, ridf);
     assertTDCount(tfr, new Term("body", "one"), 0);
     assertTD(tfr, new Term("body", "two"), new int[]{0, 1, 2, 4});
     assertTD(tfr, new Term("body", "three"), new int[]{0, 1, 3});
     assertTD(tfr, new Term("test", "one"), new int[]{4});
-    assertTD(tfr, new Term("body", "four"), new int[]{0});
-    assertTD(tfr, new Term("test", "four"), new int[]{4});
+    assertTDCount(tfr, new Term("body", "four"), 0);
     in.close();
     topLevelReader.close();
   }

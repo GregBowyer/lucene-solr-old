@@ -148,17 +148,13 @@ public class PruningAtomicReader extends FilterAtomicReader {
     private final String field;
     private final BytesRef term;
 
-    //TODO [Greg Bowyer] This is a bit weird
-    private final TermsEnum te;
-
-    private PruningDocsAndPositionsEnum(String field, BytesRef term, TermsEnum te,
+    private PruningDocsAndPositionsEnum(String field, BytesRef term,
                                         TermPruningPolicy termPolicy, DocsAndPositionsEnum in) {
       super(in);
       this.tp = in;
       this.field = field;
       this.termPolicy = termPolicy;
       this.term = term;
-      this.te = te;
     }
 
     @Override
@@ -169,7 +165,6 @@ public class PruningAtomicReader extends FilterAtomicReader {
         if (nextDoc == NO_MORE_DOCS) {
           return NO_MORE_DOCS;
         }
-        termPolicy.initPositionsTerm(this.field, this.te);
         if (!termPolicy.pruneAllPositions(tp, this.term, this.field)) {
           break;
         }
@@ -251,7 +246,8 @@ public class PruningAtomicReader extends FilterAtomicReader {
     @Override
     public DocsAndPositionsEnum docsAndPositions(Bits liveDocs, DocsAndPositionsEnum reuse, int flags) throws IOException {
       DocsAndPositionsEnum positionsEnum = super.docsAndPositions(liveDocs, reuse, flags);
-      return new PruningDocsAndPositionsEnum(this.field, this.term(), this, this.termPolicy, positionsEnum);
+      termPolicy.initPositionsTerm(this.field, this);
+      return new PruningDocsAndPositionsEnum(this.field, this.term(), this.termPolicy, positionsEnum);
     }
 
     private void informPolicy() throws IOException {
