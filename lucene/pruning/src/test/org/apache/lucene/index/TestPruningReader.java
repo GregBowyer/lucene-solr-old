@@ -328,8 +328,6 @@ public class TestPruningReader extends LuceneTestCase {
   }
   
   public void testRemoveFields() throws Exception {
-    throw new AssertionError("Rewrite this test !");
-    /*
     RAMDirectory targetDir = new RAMDirectory();
     Map<String, Integer> removeFields = new HashMap<String, Integer>();
     removeFields.put("test", PruningPolicy.DEL_POSTINGS | PruningPolicy.DEL_STORED);
@@ -343,22 +341,21 @@ public class TestPruningReader extends LuceneTestCase {
     assertNull(doc.get("test"));
     // removed postings ?
     Terms terms = tfr.fields().terms("test");
-    assertEquals(terms.size(), 0);
+    assertEquals(-1, terms.size());
 
     // but vectors should be present !
-    TermFreqVector tv = tfr.getTermFreqVector(4, "test");
+    Terms tv = tfr.getTermVector(4, "test");
     assertNotNull(tv);
-    assertEquals(4, tv.getTerms().length); // term "four" not deleted yet from TermEnum
+    assertEquals(4, tv.size()); // term "four" not deleted yet from TermEnum
     // verify new reader
     WhitespaceAnalyzer analyzer = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
     IndexWriter iw = new IndexWriter(targetDir, new IndexWriterConfig(TEST_VERSION_CURRENT, analyzer));
     iw.addIndexes(new AtomicReader[]{tfr});
     iw.close();
-    AtomicReader ir = AtomicReader.open(targetDir, true);
-    tv = ir.getTermFreqVector(4, "test");
+    AtomicReader ir = SlowCompositeReaderWrapper.wrap(DirectoryReader.open(targetDir));
+    tv = ir.getTermVector(4, "test");
     assertNotNull(tv);
-    assertEquals(3, tv.getTerms().length); // term "four" was deleted from TermEnum
-    */
+    assertEquals(3, tv.size()); // term "four" was deleted from TermEnum
   }
 
 }
