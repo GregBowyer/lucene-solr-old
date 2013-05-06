@@ -130,6 +130,13 @@
       <option name="VM_PARAMETERS" value="-ea -DtempDir=temp" />
       <option name="TEST_SEARCH_SCOPE"><value defaultName="singleModule" /></option>
     </configuration>
+    <configuration default="false" name="Module pruning" type="JUnit" factoryName="JUnit">
+      <module name="pruning" />
+      <option name="TEST_OBJECT" value="package" />
+      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$/idea-build/lucene/pruning" />
+      <option name="VM_PARAMETERS" value="-ea -DtempDir=temp" />
+      <option name="TEST_SEARCH_SCOPE"><value defaultName="singleModule" /></option>
+    </configuration>
     <configuration default="false" name="Module queries" type="JUnit" factoryName="JUnit">
       <module name="queries" />
       <option name="TEST_OBJECT" value="package" />
@@ -254,21 +261,22 @@
       <item index="15" class="java.lang.String" itemvalue="JUnit.Module join" />
       <item index="16" class="java.lang.String" itemvalue="JUnit.Module memory" />
       <item index="17" class="java.lang.String" itemvalue="JUnit.Module misc" />
-      <item index="18" class="java.lang.String" itemvalue="JUnit.Module queries" />
-      <item index="19" class="java.lang.String" itemvalue="JUnit.Module queryparser" />
-      <item index="20" class="java.lang.String" itemvalue="JUnit.Module sandbox" />
-      <item index="21" class="java.lang.String" itemvalue="JUnit.Module spatial" />
-      <item index="22" class="java.lang.String" itemvalue="JUnit.Module suggest" />
-      <item index="23" class="java.lang.String" itemvalue="JUnit.Solr core" />
-      <item index="24" class="java.lang.String" itemvalue="JUnit.Solr analysis-extras contrib" />
-      <item index="25" class="java.lang.String" itemvalue="JUnit.Solr clustering contrib" />
-      <item index="26" class="java.lang.String" itemvalue="JUnit.Solr dataimporthandler contrib" />
-      <item index="27" class="java.lang.String" itemvalue="JUnit.Solr dataimporthandler-extras contrib" />
-      <item index="28" class="java.lang.String" itemvalue="JUnit.Solr extraction contrib" />
-      <item index="29" class="java.lang.String" itemvalue="JUnit.Solr langid contrib" />
-      <item index="30" class="java.lang.String" itemvalue="JUnit.Solr uima contrib" />
-      <item index="31" class="java.lang.String" itemvalue="JUnit.Solr velocity contrib" />
-      <item index="32" class="java.lang.String" itemvalue="JUnit.Solrj" />
+      <item index="18" class="java.lang.String" itemvalue="JUnit.Module pruning" />
+      <item index="19" class="java.lang.String" itemvalue="JUnit.Module queries" />
+      <item index="20" class="java.lang.String" itemvalue="JUnit.Module queryparser" />
+      <item index="21" class="java.lang.String" itemvalue="JUnit.Module sandbox" />
+      <item index="22" class="java.lang.String" itemvalue="JUnit.Module spatial" />
+      <item index="23" class="java.lang.String" itemvalue="JUnit.Module suggest" />
+      <item index="24" class="java.lang.String" itemvalue="JUnit.Solr core" />
+      <item index="25" class="java.lang.String" itemvalue="JUnit.Solr analysis-extras contrib" />
+      <item index="26" class="java.lang.String" itemvalue="JUnit.Solr clustering contrib" />
+      <item index="27" class="java.lang.String" itemvalue="JUnit.Solr dataimporthandler contrib" />
+      <item index="28" class="java.lang.String" itemvalue="JUnit.Solr dataimporthandler-extras contrib" />
+      <item index="29" class="java.lang.String" itemvalue="JUnit.Solr extraction contrib" />
+      <item index="30" class="java.lang.String" itemvalue="JUnit.Solr langid contrib" />
+      <item index="31" class="java.lang.String" itemvalue="JUnit.Solr uima contrib" />
+      <item index="32" class="java.lang.String" itemvalue="JUnit.Solr velocity contrib" />
+      <item index="33" class="java.lang.String" itemvalue="JUnit.Solrj" />
     </list>
   </component>
 </project>

@@ -488,6 +488,17 @@
     <property name="misc-javadocs.uptodate" value="true"/>
   </target>
 
+  <property name="pruning.jar" value="${common.dir}/build/pruning/lucene-pruning-${version}.jar"/>
+  <target name="check-pruning-uptodate" unless="pruning.uptodate">
+    <module-uptodate name="pruning" jarfile="${pruning.jar}" property="pruning.uptodate"/>
+  </target>
+  <target name="jar-pruning" unless="pruning.uptodate" depends="check-pruning-uptodate">
+    <ant dir="${common.dir}/pruning" target="jar-core" inheritAll="false">
+      <propertyset refid="uptodate.and.compiled.properties"/>
+    </ant>
+    <property name="pruning.uptodate" value="true"/>
+  </target>
+
   <property name="sandbox.jar" value="${common.dir}/build/sandbox/lucene-sandbox-${version}.jar"/>
   <target name="check-sandbox-uptodate" unless="sandbox.uptodate">
     <module-uptodate name="sandbox" jarfile="${sandbox.jar}" property="sandbox.uptodate"/>
