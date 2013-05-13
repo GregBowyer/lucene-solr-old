@@ -71,6 +71,7 @@ import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.core.DirectoryFactory.DirContext;
 import org.apache.solr.handler.SnapPuller;
 import org.apache.solr.handler.admin.ShowFileRequestHandler;
+import org.apache.solr.handler.component.CollectorFactory;
 import org.apache.solr.handler.component.DebugComponent;
 import org.apache.solr.handler.component.FacetComponent;
 import org.apache.solr.handler.component.HighlightComponent;
@@ -79,6 +80,7 @@ import org.apache.solr.handler.component.QueryComponent;
 import org.apache.solr.handler.component.RealTimeGetComponent;
 import org.apache.solr.handler.component.SearchComponent;
 import org.apache.solr.handler.component.StatsComponent;
+
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.BinaryResponseWriter;
@@ -157,6 +159,8 @@ public final class SolrCore implements SolrInfoMBean {
   private final Map<String,SearchComponent> searchComponents;
   private final Map<String,UpdateRequestProcessorChain> updateProcessorChains;
   private final Map<String, SolrInfoMBean> infoRegistry;
+  private Map<String, CollectorFactory> collectorFactories;
+
   private IndexDeletionPolicyWrapper solrDelPolicy;
   private DirectoryFactory directoryFactory;
   private IndexReaderFactory indexReaderFactory;
@@ -192,6 +196,14 @@ public final class SolrCore implements SolrInfoMBean {
    */
   public String getConfigResource() {
     return solrConfig.getResourceName();
+  }
+
+  public void setCollectorFactories(Map<String, CollectorFactory> collectorFactories) {
+    this.collectorFactories = collectorFactories;
+  }
+
+  public CollectorFactory getCollectorFactory(String name) {
+    return this.collectorFactories.get(name);
   }
 
   /**
@@ -333,6 +345,23 @@ public final class SolrCore implements SolrInfoMBean {
      }     
      solrDelPolicy = new IndexDeletionPolicyWrapper(delPolicy);
    }
+
+  private void initCollectorFactories() {
+    Map<String, CollectorFactory> map = new HashMap();
+    for (PluginInfo info : solrConfig.getPluginInfos(CollectorFactory.class.getName())) {
+      CollectorFactory collectorFactory  = getResourceLoader().newInstance(info.className, CollectorFactory.class);
+      String name = info.attributes.get("name");
+      collectorFactory.setName(name);
+      map.put(name, collectorFactory);
+     }
+
+    if(!map.containsKey("default")) {
+        CollectorFactory defaultCollectorFactory = new CollectorFactory();
+        defaultCollectorFactory.setName("default");
+        map.put("default", defaultCollectorFactory);
+    }
+    this.collectorFactories = map;
+  }
 
   private void initListeners() {
     final Class<SolrEventListener> clazz = SolrEventListener.class;
@@ -605,6 +634,10 @@ public final class SolrCore implements SolrInfoMBean {
     return createReloadedUpdateHandler(className, "Update Handler", updateHandler);
   }
 
+  private CollectorFactory createCollectorFactory(String className) {
+    return createInstance(className, CollectorFactory.class, "Collector Factory");
+  }
+
   private QueryResponseWriter createQueryResponseWriter(String className) {
     return createInstance(className, QueryResponseWriter.class, "Query Response Writer");
   }
@@ -758,7 +791,8 @@ public final class SolrCore implements SolrInfoMBean {
       initQParsers();
       initValueSourceParsers();
       initTransformerFactories();
-      
+      initCollectorFactories();     
+ 
       this.searchComponents = Collections
           .unmodifiableMap(loadSearchComponents());
       

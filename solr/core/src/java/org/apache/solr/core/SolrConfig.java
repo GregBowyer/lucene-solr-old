@@ -24,6 +24,7 @@ import org.apache.solr.util.DOMUtil;
 import org.apache.solr.util.FileUtils;
 import org.apache.solr.util.RegexFileFilter;
 import org.apache.solr.handler.component.SearchComponent;
+import org.apache.solr.handler.component.CollectorFactory;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.transform.TransformerFactory;
@@ -214,6 +215,8 @@ public class SolrConfig extends Config {
      loadPluginInfo(TransformerFactory.class,"transformer",true, true);
      loadPluginInfo(SearchComponent.class,"searchComponent",true, true);
      loadPluginInfo(QueryConverter.class,"queryConverter",true, true);
+     loadPluginInfo(CollectorFactory.class,"collectorFactory",true, true);
+
 
      // this is hackish, since it picks up all SolrEventListeners,
      // regardless of when/how/why they are used (or even if they are 

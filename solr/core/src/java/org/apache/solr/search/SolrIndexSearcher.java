@@ -85,6 +85,7 @@ import org.apache.lucene.util.OpenBitSet;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.solr.common.params.CollectorParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.core.DirectoryFactory;
@@ -92,6 +93,9 @@ import org.apache.solr.core.DirectoryFactory.DirContext;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.core.SolrInfoMBean;
+import org.apache.solr.handler.component.CollectorFactory;
+import org.apache.solr.handler.component.CollectorSpec;
+import org.apache.solr.handler.component.ResponseBuilder;
 import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestInfo;
@@ -1273,7 +1277,7 @@ public class SolrIndexSearcher extends IndexSearcher implements Closeable,SolrIn
     {
         // all of the current flags can be reused during warming,
         // so set all of them on the cache key.
-        key = new QueryResultKey(q, cmd.getFilterList(), cmd.getSort(), flags);
+        key = new QueryResultKey(q, cmd.getFilterList(), cmd.getSort(), cmd.getCollectorSpec(), flags);
         if ((flags & NO_CHECK_QCACHE)==0) {
           superset = queryResultCache.get(key);
 
@@ -1375,7 +1379,7 @@ public class SolrIndexSearcher extends IndexSearcher implements Closeable,SolrIn
 
     // lastly, put the superset in the cache if the size is less than or equal
     // to queryResultMaxDocsCached
-    if (key != null && superset.size() <= queryResultMaxDocsCached && !qr.isPartialResults()) {
+    if (key != null && superset.size() <= queryResultMaxDocsCached && !qr.isPartialResults() && cmd.getCollectorSpec().getDelegating() == null) {
       queryResultCache.put(key, superset);
     }
   }
@@ -1473,18 +1477,30 @@ public class SolrIndexSearcher extends IndexSearcher implements Closeable,SolrIn
       totalHits = numHits[0];
       maxScore = totalHits>0 ? topscore[0] : 0.0f;
     } else {
-      TopDocsCollector topCollector;
-      if (cmd.getSort() == null) {
-        if(cmd.getScoreDoc() != null) {
-          topCollector = TopScoreDocCollector.create(len, cmd.getScoreDoc(), true); //create the Collector with InOrderPagingCollector
-        } else {
-          topCollector = TopScoreDocCollector.create(len, true);
-        }
+      CollectorFactory collectorFactory = core.getCollectorFactory(cmd.getCollectorSpec().getName());
+      TopDocsCollector topCollector = (TopDocsCollector)collectorFactory.getCollector(this, cmd.getCollectorSpec(), cmd, len, needScores);
+      Collector collector;
+      CollectorSpec[] delegating = cmd.getCollectorSpec().getDelegating();
 
+      if(delegating.length > 0) {
+          DelegatingCollector firstDelegating = null;
+          for(int i=0; i<delegating.length; i++) {
+              collectorFactory = core.getCollectorFactory(delegating[i].getName());
+              collectorFactory.setOrdinal(delegating[i].getId());
+              DelegatingCollector dcollector = (DelegatingCollector) collectorFactory.getCollector(this, delegating[i], cmd, len, needScores);
+              if(firstDelegating != null) {
+                firstDelegating.setLastDelegate(dcollector);
+              } else {
+                firstDelegating = dcollector;
+              }
+          }
+
+          firstDelegating.setLastDelegate(topCollector);
+          collector = firstDelegating;
       } else {
-        topCollector = TopFieldCollector.create(weightSort(cmd.getSort()), len, false, needScores, needScores, true);
+        collector = topCollector;
       }
-      Collector collector = topCollector;
+
       if (terminateEarly) {
         collector = new EarlyTerminatingCollector(collector, cmd.len);
       }
@@ -1604,16 +1620,31 @@ public class SolrIndexSearcher extends IndexSearcher implements Closeable,SolrIn
       maxScore = totalHits>0 ? topscore[0] : 0.0f;
     } else {
 
-      TopDocsCollector topCollector;
+      CollectorFactory collectorFactory = core.getCollectorFactory(cmd.getCollectorSpec().getName());
+      DocSetDelegateCollector setCollector = (DocSetDelegateCollector)collectorFactory.getDocSetCollector(this, cmd.getCollectorSpec(), cmd, len, maxDoc, needScores);
+      TopDocsCollector topCollector = (TopDocsCollector)setCollector.getCollector();
+      Collector collector;
+      CollectorSpec[] delegating = cmd.getCollectorSpec().getDelegating();
 
-      if (cmd.getSort() == null) {
-        topCollector = TopScoreDocCollector.create(len, true);
+      if(delegating.length > 0) {
+        DelegatingCollector firstDelegating = null;
+        for(int i=0; i<delegating.length; i++) {
+            collectorFactory = core.getCollectorFactory(delegating[i].getName());
+            collectorFactory.setOrdinal(delegating[i].getId());
+            DelegatingCollector dcollector = (DelegatingCollector) collectorFactory.getCollector(this, delegating[i], cmd, len, needScores);
+            if(firstDelegating != null) {
+                firstDelegating.setLastDelegate(dcollector);
+            } else {
+                firstDelegating = dcollector;
+            }
+        }
+
+        firstDelegating.setLastDelegate(setCollector);
+        collector = firstDelegating;
       } else {
-        topCollector = TopFieldCollector.create(weightSort(cmd.getSort()), len, false, needScores, needScores, true);
+        collector = setCollector;
       }
 
-      DocSetCollector setCollector = new DocSetDelegateCollector(maxDoc>>6, maxDoc, topCollector);
-      Collector collector = setCollector;
       if (terminateEarly) {
         collector = new EarlyTerminatingCollector(collector, cmd.len);
       }
@@ -2127,6 +2158,7 @@ public class SolrIndexSearcher extends IndexSearcher implements Closeable,SolrIn
    * if we want to pass additional information to the searcher.
    */
   public static class QueryCommand {
+    private static final CollectorSpec DEFAULT_COLLECTOR_SPEC = new CollectorSpec("default");
     private Query query;
     private List<Query> filterList;
     private DocSet filter;
@@ -2136,6 +2168,8 @@ public class SolrIndexSearcher extends IndexSearcher implements Closeable,SolrIn
     private int supersetMaxDoc;
     private int flags;
     private long timeAllowed = -1;
+    private CollectorSpec collectorSpec = DEFAULT_COLLECTOR_SPEC;
+    private ResponseBuilder responseBuilder;
     //Issue 1726 start
     private ScoreDoc scoreDoc;
     
@@ -2194,6 +2228,24 @@ public class SolrIndexSearcher extends IndexSearcher implements Closeable,SolrIn
       }
       this.filter = filter;
       return this;
+    }
+
+    public QueryCommand setCollectorSpec(CollectorSpec collectorSpec) {
+      this.collectorSpec = collectorSpec;
+      return this;
+    }
+
+    public QueryCommand setResponseBuilder(ResponseBuilder responseBuilder) {
+      this.responseBuilder = responseBuilder;
+      return this;
+    }
+
+    public ResponseBuilder getResponseBuilder () {
+      return this.responseBuilder;
+    }
+
+    public CollectorSpec getCollectorSpec() {
+      return this.collectorSpec;
     }
 
     public Sort getSort() { return sort; }

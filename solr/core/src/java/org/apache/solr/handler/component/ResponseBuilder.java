@@ -70,6 +70,7 @@ public class ResponseBuilder
   private List<Query> filters = null;
   private SortSpec sortSpec = null;
   private GroupingSpecification groupingSpec;
+  private CollectorSpec collectorSpec;
   //used for handling deep paging
   private ScoreDoc scoreDoc;
 
@@ -97,6 +98,14 @@ public class ResponseBuilder
   //// Distributed Search section
   //////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////
+
+  public SolrQueryRequest getRequest() {
+    return req;
+  }
+
+  public SolrQueryResponse getResponse() {
+      return rsp;
+  }
 
   public static final String FIELD_SORT_VALUES = "fsv";
   public static final String SHARDS = "shards";
@@ -341,6 +350,14 @@ public class ResponseBuilder
     this.sortSpec = sort;
   }
 
+  public CollectorSpec getCollectorSpec() {
+    return this.collectorSpec;
+  }
+
+  public void setCollectorSpec(CollectorSpec collectorSpec) {
+    this.collectorSpec = collectorSpec;
+  }
+
   public GroupingSpecification getGroupingSpec() {
     return groupingSpec;
   }
@@ -386,9 +403,15 @@ public class ResponseBuilder
             .setLen(getSortSpec().getCount())
             .setFlags(getFieldFlags())
             .setNeedDocSet(isNeedDocSet())
+            .setCollectorSpec(getCollectorSpec())
+            .setResponseBuilder(this)
             .setScoreDoc(getScoreDoc()); //Issue 1726
+            
     return cmd;
   }
+
+
+  
 
   /**
    * Sets results from a SolrIndexSearcher.QueryResult.

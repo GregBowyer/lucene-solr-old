@@ -77,6 +77,11 @@ public class DocSetDelegateCollector extends DocSetCollector {
     collector.setScorer(scorer);
   }
 
+  public Collector getCollector(){
+    return this.collector;
+  }
+
+
   @Override
   public void setNextReader(AtomicReaderContext context) throws IOException {
     collector.setNextReader(context);
