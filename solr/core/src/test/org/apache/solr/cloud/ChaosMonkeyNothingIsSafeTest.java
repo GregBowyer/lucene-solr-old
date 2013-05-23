@@ -42,8 +42,8 @@ import org.slf4j.LoggerFactory;
 @Slow
 @BadApple
 public class ChaosMonkeyNothingIsSafeTest extends AbstractFullDistribZkTestBase {
-  public static Logger log = LoggerFactory.getLogger(ChaosMonkeyNothingIsSafeTest.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(ChaosMonkeyNothingIsSafeTest.class);
+
   private static final int BASE_RUN_LENGTH = 60000;
 
   @BeforeClass

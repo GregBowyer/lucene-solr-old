@@ -47,7 +47,7 @@ import java.util.*;
  * @see org.apache.solr.handler.extraction.ExtractingDocumentLoader
  */
 public class SolrContentHandler extends DefaultHandler implements ExtractingParams {
-  private transient static Logger log = LoggerFactory.getLogger(SolrContentHandler.class);
+  private transient static final Logger log = LoggerFactory.getLogger(SolrContentHandler.class);
   protected SolrInputDocument document;
 
   protected Collection<String> dateFormats = DateUtil.DEFAULT_DATE_FORMATS;

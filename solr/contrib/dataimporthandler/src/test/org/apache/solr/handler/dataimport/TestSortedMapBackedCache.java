@@ -30,9 +30,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TestSortedMapBackedCache extends AbstractDIHCacheTestCase {
-  
-  public static Logger log = LoggerFactory.getLogger(TestSortedMapBackedCache.class);
-  
+
+  private static final Logger log = LoggerFactory.getLogger(TestSortedMapBackedCache.class);
+
   @Test
   public void testCacheWithKeyLookup() {
     DIHCache cache = null;

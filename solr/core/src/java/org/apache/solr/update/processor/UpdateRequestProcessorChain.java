@@ -58,9 +58,8 @@ import java.util.ArrayList;
  * @see #createProcessor
  * @since solr 1.3
  */
-public final class UpdateRequestProcessorChain implements PluginInfoInitialized
-{
-  public final static Logger log = LoggerFactory.getLogger(UpdateRequestProcessorChain.class);
+public final class UpdateRequestProcessorChain implements PluginInfoInitialized {
+  private static final Logger log = LoggerFactory.getLogger(UpdateRequestProcessorChain.class);
 
   private UpdateRequestProcessorFactory[] chain;
   private final SolrCore solrCore;

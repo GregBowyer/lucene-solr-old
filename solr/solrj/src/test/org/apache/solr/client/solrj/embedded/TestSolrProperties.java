@@ -53,7 +53,7 @@ import com.carrotsearch.randomizedtesting.rules.SystemPropertiesRestoreRule;
  * @since solr 1.3
  */
 public class TestSolrProperties extends AbstractEmbeddedSolrServerTestCase {
-  protected static Logger log = LoggerFactory.getLogger(TestSolrProperties.class);
+  private static final Logger log = LoggerFactory.getLogger(TestSolrProperties.class);
 
   private static final String SOLR_XML = "solr.xml";
   private static final String SOLR_PERSIST_XML = "solr-persist.xml";

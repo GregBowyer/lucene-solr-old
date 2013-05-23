@@ -57,9 +57,9 @@ import org.slf4j.LoggerFactory;
  * @see FieldValueMutatingUpdateProcessor
  * @see FieldNameSelector
  */
-public abstract class FieldMutatingUpdateProcessor 
-  extends UpdateRequestProcessor {
-  public final static Logger log = LoggerFactory.getLogger(FieldMutatingUpdateProcessor.class);
+public abstract class FieldMutatingUpdateProcessor
+    extends UpdateRequestProcessor {
+  private static final Logger log = LoggerFactory.getLogger(FieldMutatingUpdateProcessor.class);
 
   private final FieldNameSelector selector;
   public FieldMutatingUpdateProcessor(FieldNameSelector selector,

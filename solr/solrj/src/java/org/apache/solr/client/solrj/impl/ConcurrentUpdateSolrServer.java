@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ConcurrentUpdateSolrServer extends SolrServer {
   private static final long serialVersionUID = 1L;
-  static final Logger log = LoggerFactory
+  private static final Logger log = LoggerFactory
       .getLogger(ConcurrentUpdateSolrServer.class);
   private HttpSolrServer server;
   final BlockingQueue<UpdateRequest> queue;

@@ -54,8 +54,7 @@ import com.google.common.collect.Multimap;
 @Bindable
 public class SolrStopwordsCarrot2LexicalDataFactory implements
     ILexicalDataFactory {
-  final static Logger logger = org.slf4j.LoggerFactory
-      .getLogger(SolrStopwordsCarrot2LexicalDataFactory.class);
+  private static final Logger logger = org.slf4j.LoggerFactory.getLogger(SolrStopwordsCarrot2LexicalDataFactory.class);
 
   @Init
   @Input

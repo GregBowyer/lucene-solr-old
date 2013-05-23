@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public class UIMAToSolrMapper {
 
-  private final Logger log = LoggerFactory.getLogger(UIMAToSolrMapper.class);
+  private static final Logger log = LoggerFactory.getLogger(UIMAToSolrMapper.class);
 
   private SolrInputDocument document;
 

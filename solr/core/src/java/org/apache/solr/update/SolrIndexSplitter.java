@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SolrIndexSplitter {
-  public static Logger log = LoggerFactory.getLogger(SolrIndexSplitter.class);
+  private static final Logger log = LoggerFactory.getLogger(SolrIndexSplitter.class);
 
   SolrIndexSearcher searcher;
   SchemaField field;

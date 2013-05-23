@@ -105,11 +105,11 @@ import org.slf4j.LoggerFactory;
  *   &lt;/updateRequestProcessorChain&gt;
  * </pre>
  */
-public class CloneFieldUpdateProcessorFactory 
-  extends UpdateRequestProcessorFactory implements SolrCoreAware {
-  
-  private final static Logger log = LoggerFactory.getLogger(CloneFieldUpdateProcessorFactory.class);
-  
+public class CloneFieldUpdateProcessorFactory
+    extends UpdateRequestProcessorFactory implements SolrCoreAware {
+
+  private static final Logger log = LoggerFactory.getLogger(CloneFieldUpdateProcessorFactory.class);
+
   public static final String SOURCE_PARAM = "source";
   public static final String DEST_PARAM = "dest";
   

@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
 public class MoreLikeThisComponent extends SearchComponent {
   public static final String COMPONENT_NAME = "mlt";
   public static final String DIST_DOC_ID = "mlt.dist.id";
-  static final Logger log = LoggerFactory
+  private static final Logger log = LoggerFactory
       .getLogger(MoreLikeThisComponent.class);
   
   @Override

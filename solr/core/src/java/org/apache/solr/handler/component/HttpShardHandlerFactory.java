@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HttpShardHandlerFactory extends ShardHandlerFactory implements PluginInfoInitialized {
-  protected static Logger log = LoggerFactory.getLogger(HttpShardHandlerFactory.class);
+  private static final Logger log = LoggerFactory.getLogger(HttpShardHandlerFactory.class);
 
   // We want an executor that doesn't take up any resources if
   // it's not used, so it could be created statically for

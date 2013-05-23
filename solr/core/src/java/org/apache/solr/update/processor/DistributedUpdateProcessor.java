@@ -77,7 +77,7 @@ import static org.apache.solr.update.processor.DistributingUpdateProcessorFactor
 // NOT mt-safe... create a new processor for each add thread
 // TODO: we really should not wait for distrib after local? unless a certain replication factor is asked for
 public class DistributedUpdateProcessor extends UpdateRequestProcessor {
-  public final static Logger log = LoggerFactory.getLogger(DistributedUpdateProcessor.class);
+  private static final Logger log = LoggerFactory.getLogger(DistributedUpdateProcessor.class);
 
   /**
    * Values this processor supports for the <code>DISTRIB_UPDATE_PARAM</code>.

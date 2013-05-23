@@ -51,10 +51,7 @@ public class SearchHandler extends RequestHandlerBase implements SolrCoreAware ,
   static final String INIT_LAST_COMPONENTS = "last-components";
 
 
-  
-
-  
-  protected static Logger log = LoggerFactory.getLogger(SearchHandler.class);
+  private static final Logger log = LoggerFactory.getLogger(SearchHandler.class);
 
   protected List<SearchComponent> components = null;
   private ShardHandlerFactory shardHandlerFactory ;

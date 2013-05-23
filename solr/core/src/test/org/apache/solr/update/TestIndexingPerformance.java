@@ -57,9 +57,8 @@ public class TestIndexingPerformance extends AbstractSolrTestCase {
     }
   }
 
-  public static final Logger log 
-    = LoggerFactory.getLogger(TestIndexingPerformance.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(TestIndexingPerformance.class);
+
 
   public void testIndexingPerf() throws IOException {
     int iter=1000;

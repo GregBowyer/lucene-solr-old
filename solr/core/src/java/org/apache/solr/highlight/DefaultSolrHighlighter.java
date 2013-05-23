@@ -53,11 +53,10 @@ import java.util.*;
  * 
  * @since solr 1.3
  */
-public class DefaultSolrHighlighter extends SolrHighlighter implements PluginInfoInitialized
-{
+public class DefaultSolrHighlighter extends SolrHighlighter implements PluginInfoInitialized {
 
-  public static Logger log = LoggerFactory.getLogger(DefaultSolrHighlighter.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(DefaultSolrHighlighter.class);
+
   private SolrCore solrCore;
 
   public DefaultSolrHighlighter() {

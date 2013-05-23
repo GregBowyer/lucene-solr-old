@@ -58,8 +58,8 @@ abstract class CSVLoaderBase extends ContentStreamLoader {
 
   private static Pattern colonSplit = Pattern.compile(":");
   private static Pattern commaSplit = Pattern.compile(",");
-  
-  public static Logger log = LoggerFactory.getLogger(CSVLoaderBase.class);
+
+  private static final Logger log = LoggerFactory.getLogger(CSVLoaderBase.class);
 
   final IndexSchema schema;
   final SolrParams params;

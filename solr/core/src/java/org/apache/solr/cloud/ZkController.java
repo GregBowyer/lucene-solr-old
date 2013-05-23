@@ -84,7 +84,7 @@ import org.w3c.dom.NodeList;
  */
 public final class ZkController {
 
-  private static Logger log = LoggerFactory.getLogger(ZkController.class);
+  private static final Logger log = LoggerFactory.getLogger(ZkController.class);
 
   static final String NEWL = System.getProperty("line.separator");
 

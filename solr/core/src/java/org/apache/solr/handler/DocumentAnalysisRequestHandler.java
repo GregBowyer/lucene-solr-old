@@ -78,7 +78,7 @@ import java.util.*;
  */
 public class DocumentAnalysisRequestHandler extends AnalysisRequestHandlerBase {
 
-  public static final Logger log = LoggerFactory.getLogger(DocumentAnalysisRequestHandler.class);
+  private static final Logger log = LoggerFactory.getLogger(DocumentAnalysisRequestHandler.class);
   private static final XMLErrorLogger xmllog = new XMLErrorLogger(log);
 
   private static final float DEFAULT_BOOST = 1.0f;

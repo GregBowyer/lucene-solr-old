@@ -42,8 +42,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Slow
-public class ClusterStateUpdateTest extends SolrTestCaseJ4  {
-  protected static Logger log = LoggerFactory
+public class ClusterStateUpdateTest extends SolrTestCaseJ4 {
+  private static final Logger log = LoggerFactory
       .getLogger(AbstractZkTestCase.class);
 
   private static final boolean VERBOSE = false;

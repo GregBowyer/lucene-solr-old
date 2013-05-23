@@ -64,7 +64,7 @@ public class RecoveryStrategy extends Thread implements ClosableThread {
   
   private static final String REPLICATION_HANDLER = "/replication";
 
-  private static Logger log = LoggerFactory.getLogger(RecoveryStrategy.class);
+  private static final Logger log = LoggerFactory.getLogger(RecoveryStrategy.class);
 
   public static interface RecoveryListener {
     public void recovered();

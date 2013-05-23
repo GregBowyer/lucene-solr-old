@@ -153,7 +153,7 @@ import org.slf4j.LoggerFactory;
  */
 public class StatelessScriptUpdateProcessorFactory extends UpdateRequestProcessorFactory implements SolrCoreAware {
 
-  public static Logger log = LoggerFactory.getLogger(StatelessScriptUpdateProcessorFactory.class);
+  private static final Logger log = LoggerFactory.getLogger(StatelessScriptUpdateProcessorFactory.class);
 
   private final static String SCRIPT_ARG = "script";
   private final static String PARAMS_ARG = "params";

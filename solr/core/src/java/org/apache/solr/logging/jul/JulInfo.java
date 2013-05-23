@@ -34,7 +34,7 @@ public class JulInfo extends LoggerInfo {
       // Level.ALL -- ignore. It is useless.
   };
 
-  final Logger logger;
+  private final Logger logger;
 
   public JulInfo(String name, Logger logger) {
     super(name);

@@ -31,8 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class DefaultSolrCoreState extends SolrCoreState implements RecoveryStrategy.RecoveryListener {
-  public static Logger log = LoggerFactory.getLogger(DefaultSolrCoreState.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(DefaultSolrCoreState.class);
+
   private final boolean SKIP_AUTO_RECOVERY = Boolean.getBoolean("solrcloud.skip.autorecovery");
   
   private final Object recoveryLock = new Object();

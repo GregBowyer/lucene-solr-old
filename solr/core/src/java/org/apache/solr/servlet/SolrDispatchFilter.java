@@ -73,9 +73,8 @@ import org.slf4j.LoggerFactory;
  *
  * @since solr 1.2
  */
-public class SolrDispatchFilter implements Filter
-{
-  final Logger log = LoggerFactory.getLogger(SolrDispatchFilter.class);
+public class SolrDispatchFilter implements Filter {
+  private static final Logger log = LoggerFactory.getLogger(SolrDispatchFilter.class);
 
   protected volatile CoreContainer cores;
 

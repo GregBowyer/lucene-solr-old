@@ -78,7 +78,7 @@ import org.xml.sax.SAXException;
  * @since solr 1.3
  */
 public class CoreAdminHandler extends RequestHandlerBase {
-  protected static Logger log = LoggerFactory.getLogger(CoreAdminHandler.class);
+  private static final Logger log = LoggerFactory.getLogger(CoreAdminHandler.class);
   protected final CoreContainer coreContainer;
 
   public CoreAdminHandler() {

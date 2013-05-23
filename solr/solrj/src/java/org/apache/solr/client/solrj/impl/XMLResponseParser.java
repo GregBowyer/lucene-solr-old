@@ -44,9 +44,8 @@ import java.util.Locale;
  *
  * @since solr 1.3
  */
-public class XMLResponseParser extends ResponseParser
-{
-  public static Logger log = LoggerFactory.getLogger(XMLResponseParser.class);
+public class XMLResponseParser extends ResponseParser {
+  private static final Logger log = LoggerFactory.getLogger(XMLResponseParser.class);
   private static final XMLErrorLogger xmllog = new XMLErrorLogger(log);
 
   // reuse the factory among all parser instances so things like string caches

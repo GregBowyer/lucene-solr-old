@@ -40,8 +40,7 @@ public abstract class AbstractZkTestCase extends SolrTestCaseJ4 {
 
   private static final boolean DEBUG = false;
 
-  protected static Logger log = LoggerFactory
-      .getLogger(AbstractZkTestCase.class);
+  private static final Logger log = LoggerFactory.getLogger(AbstractZkTestCase.class);
 
   
   public static File SOLRHOME;

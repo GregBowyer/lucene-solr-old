@@ -60,7 +60,7 @@ public abstract class StrategyTestCase extends SpatialTestCase {
   public static final String QTEST_States_Intersects_BBox = "states-Intersects-BBox.txt";
   public static final String QTEST_Cities_Intersects_BBox = "cities-Intersects-BBox.txt";
 
-  private Logger log = Logger.getLogger(getClass().getName());
+  private static final Logger log = Logger.getLogger(getClass().getName());
 
   protected final SpatialArgsParser argsParser = new SpatialArgsParser();
 

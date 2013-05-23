@@ -61,7 +61,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  */
 public class TransactionLog {
-  public static Logger log = LoggerFactory.getLogger(TransactionLog.class);
+  private static final Logger log = LoggerFactory.getLogger(TransactionLog.class);
   final boolean debug = log.isDebugEnabled();
   final boolean trace = log.isTraceEnabled();
 

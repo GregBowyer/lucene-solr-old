@@ -46,8 +46,7 @@ public final class FieldTypePluginLoader
   private static final String LUCENE_MATCH_VERSION_PARAM
     = IndexSchema.LUCENE_MATCH_VERSION_PARAM;
 
-  protected final static Logger log 
-    = LoggerFactory.getLogger(FieldTypePluginLoader.class);
+  private static final Logger log = LoggerFactory.getLogger(FieldTypePluginLoader.class);
 
   private final XPath xpath = XPathFactory.newInstance().newXPath();
 

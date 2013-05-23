@@ -104,9 +104,9 @@ public class CoreContainer
   private static final int DEFAULT_ZK_CLIENT_TIMEOUT = 15000;
   public static final String DEFAULT_DEFAULT_CORE_NAME = "collection1";
   private static final boolean DEFAULT_SHARE_SCHEMA = false;
-  
-  protected static Logger log = LoggerFactory.getLogger(CoreContainer.class);
-  
+
+  private static final Logger log = LoggerFactory.getLogger(CoreContainer.class);
+
   // solr.xml node constants
   private static final String CORE_NAME = "name";
   private static final String CORE_CONFIG = "config";

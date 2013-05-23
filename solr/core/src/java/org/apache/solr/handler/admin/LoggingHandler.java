@@ -34,6 +34,7 @@ import org.apache.solr.logging.LoggerInfo;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.util.plugin.SolrCoreAware;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
@@ -43,8 +44,8 @@ import org.slf4j.LoggerFactory;
  * @since 4.0
  */
 public class LoggingHandler extends RequestHandlerBase implements SolrCoreAware {
-  static final org.slf4j.Logger log = LoggerFactory.getLogger(LoggingHandler.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(LoggingHandler.class);
+
   LogWatcher watcher = null;
   
   @Override

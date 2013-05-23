@@ -134,8 +134,8 @@ public final class SolrCore implements SolrInfoMBean {
   public static final AtomicLong numCloses = new AtomicLong();
   public static Map<SolrCore,Exception> openHandles = Collections.synchronizedMap(new IdentityHashMap<SolrCore, Exception>());
 
-  
-  public static Logger log = LoggerFactory.getLogger(SolrCore.class);
+
+  public static final Logger log = LoggerFactory.getLogger(SolrCore.class);
 
   private String name;
   private String logid; // used to show what name is set

@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SolrXMLSerializer {
-  protected static Logger log = LoggerFactory
+  private static final Logger log = LoggerFactory
       .getLogger(SolrXMLSerializer.class);
   
   private final static String INDENT = "  ";

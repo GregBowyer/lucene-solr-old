@@ -83,8 +83,7 @@ import com.google.common.io.Closeables;
  * @see "http://project.carrot2.org"
  */
 public class CarrotClusteringEngine extends SearchClusteringEngine {
-  private transient static Logger log = LoggerFactory
-          .getLogger(CarrotClusteringEngine.class);
+  private transient static final Logger log = LoggerFactory.getLogger(CarrotClusteringEngine.class);
 
   /**
    * The subdirectory in Solr config dir to read customized Carrot2 resources from.

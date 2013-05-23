@@ -74,7 +74,7 @@ public class CurrencyField extends FieldType implements SchemaAware, ResourceLoa
   private String exchangeRateProviderClass;
   private String defaultCurrency;
   private ExchangeRateProvider provider;
-  public static Logger log = LoggerFactory.getLogger(CurrencyField.class);
+  private static final Logger log = LoggerFactory.getLogger(CurrencyField.class);
 
   @Override
   protected void init(IndexSchema schema, Map<String, String> args) {

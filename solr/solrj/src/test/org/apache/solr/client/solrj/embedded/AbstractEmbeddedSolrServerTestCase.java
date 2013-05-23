@@ -31,7 +31,7 @@ import java.io.File;
 
 public abstract class AbstractEmbeddedSolrServerTestCase extends LuceneTestCase {
 
-  protected static Logger log = LoggerFactory.getLogger(AbstractEmbeddedSolrServerTestCase.class);
+  private static final Logger log = LoggerFactory.getLogger(AbstractEmbeddedSolrServerTestCase.class);
 
   protected static final File SOLR_HOME = SolrTestCaseJ4.getFile("solrj/solr/shared");
 

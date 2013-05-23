@@ -55,7 +55,7 @@ import java.util.Set;
  * &lt;/searchComponent&gt;</pre>
  */
 public class ClusteringComponent extends SearchComponent implements SolrCoreAware {
-  private transient static Logger log = LoggerFactory.getLogger(ClusteringComponent.class);
+  private transient static final Logger log = LoggerFactory.getLogger(ClusteringComponent.class);
 
   private Map<String, SearchClusteringEngine> searchClusteringEngines = new HashMap<String, SearchClusteringEngine>();
   private Map<String, DocumentClusteringEngine> documentClusteringEngines = new HashMap<String, DocumentClusteringEngine>();

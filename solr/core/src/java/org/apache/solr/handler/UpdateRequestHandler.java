@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * UpdateHandler that uses content-type to pick the right Loader
  */
 public class UpdateRequestHandler extends ContentStreamHandlerBase {
-  public static Logger log = LoggerFactory.getLogger(UpdateRequestHandler.class);
+  public static final Logger log = LoggerFactory.getLogger(UpdateRequestHandler.class);
 
   // XML Constants
   public static final String ADD = "add";

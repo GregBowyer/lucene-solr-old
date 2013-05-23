@@ -43,9 +43,9 @@ import org.slf4j.LoggerFactory;
  * End-to-end test of SolrEntityProcessor. "Real" test using embedded Solr
  */
 public class TestSolrEntityProcessorEndToEnd extends AbstractDataImportHandlerTestCase {
-  
-  private static Logger LOG = LoggerFactory.getLogger(TestSolrEntityProcessorEndToEnd.class);
-  
+
+  private static final Logger LOG = LoggerFactory.getLogger(TestSolrEntityProcessorEndToEnd.class);
+
   private static final String SOLR_CONFIG = "dataimport-solrconfig.xml";
   private static final String SOLR_SCHEMA = "dataimport-schema.xml";
   private static final String SOURCE_CONF_DIR = "dih" + File.separator + "solr" + File.separator + "collection1" + File.separator + "conf" + File.separator;

@@ -72,9 +72,8 @@ import static org.apache.lucene.index.FieldInfo.IndexOptions.DOCS_ONLY;
  *
  * @since solr 1.2
  */
-public class LukeRequestHandler extends RequestHandlerBase
-{
-  private static Logger log = LoggerFactory.getLogger(LukeRequestHandler.class);
+public class LukeRequestHandler extends RequestHandlerBase {
+  private static final Logger log = LoggerFactory.getLogger(LukeRequestHandler.class);
 
   public static final String NUMTERMS = "numTerms";
   public static final String DOC_ID = "docId";

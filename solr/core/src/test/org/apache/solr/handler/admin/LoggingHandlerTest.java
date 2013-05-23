@@ -34,7 +34,7 @@ public class LoggingHandlerTest extends SolrTestCaseJ4 {
 
   @Test
   public void testLogLevelHandlerOutput() throws Exception {
-    Logger tst = Logger.getLogger("org.apache.solr.SolrTestCaseJ4");
+    private static final Logger tst = Logger.getLogger("org.apache.solr.SolrTestCaseJ4");
     JulInfo wrap = new JulInfo(tst.getName(), tst);
     
     assertQ("Show Log Levels OK",

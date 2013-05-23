@@ -61,7 +61,7 @@ public abstract class AbstractSolrTestCase extends SolrTestCaseJ4 {
     return SolrTestCaseJ4.TEST_HOME();
   }
 
-  public static Logger log = LoggerFactory.getLogger(AbstractSolrTestCase.class);
+  private static final Logger log = LoggerFactory.getLogger(AbstractSolrTestCase.class);
 
 
     /** Causes an exception matching the regex pattern to not be logged. */

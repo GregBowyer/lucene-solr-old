@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 
 public abstract class ElectionContext {
-  private static Logger log = LoggerFactory.getLogger(ElectionContext.class);
+  private static final Logger log = LoggerFactory.getLogger(ElectionContext.class);
   final String electionPath;
   final ZkNodeProps leaderProps;
   final String id;
@@ -71,7 +71,7 @@ public abstract class ElectionContext {
 }
 
 class ShardLeaderElectionContextBase extends ElectionContext {
-  private static Logger log = LoggerFactory.getLogger(ShardLeaderElectionContextBase.class);
+  private static final Logger log = LoggerFactory.getLogger(ShardLeaderElectionContextBase.class);
   protected final SolrZkClient zkClient;
   protected String shardId;
   protected String collection;
@@ -109,8 +109,8 @@ class ShardLeaderElectionContextBase extends ElectionContext {
 
 // add core container and stop passing core around...
 final class ShardLeaderElectionContext extends ShardLeaderElectionContextBase {
-  private static Logger log = LoggerFactory.getLogger(ShardLeaderElectionContext.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(ShardLeaderElectionContext.class);
+
   private ZkController zkController;
   private CoreContainer cc;
   private SyncStrategy syncStrategy = new SyncStrategy();

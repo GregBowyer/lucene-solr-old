@@ -75,7 +75,7 @@ public class SolrIndexSearcher extends IndexSearcher implements Closeable,SolrIn
   public static final AtomicLong numCloses = new AtomicLong();
 
 
-  private static Logger log = LoggerFactory.getLogger(SolrIndexSearcher.class);
+  private static final Logger log = LoggerFactory.getLogger(SolrIndexSearcher.class);
   private final SolrCore core;
   private final IndexSchema schema;
 

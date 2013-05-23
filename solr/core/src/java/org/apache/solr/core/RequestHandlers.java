@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 /**
  */
 public final class RequestHandlers {
-  public static Logger log = LoggerFactory.getLogger(RequestHandlers.class);
+  private static final Logger log = LoggerFactory.getLogger(RequestHandlers.class);
 
   protected final SolrCore core;
   // Use a synchronized map - since the handlers can be changed at runtime, 

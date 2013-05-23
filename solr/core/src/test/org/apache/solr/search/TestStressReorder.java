@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.apache.solr.update.processor.DistributingUpdateProcessorFactory.DISTRIB_UPDATE_PARAM;
 
 public class TestStressReorder extends TestRTGBase {
-  public static Logger log = LoggerFactory.getLogger(TestStressReorder.class);
+  private static final Logger log = LoggerFactory.getLogger(TestStressReorder.class);
 
 
   @BeforeClass

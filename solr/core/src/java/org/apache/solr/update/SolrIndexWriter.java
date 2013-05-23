@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 
 public class SolrIndexWriter extends IndexWriter {
-  private static Logger log = LoggerFactory.getLogger(SolrIndexWriter.class);
+  private static final Logger log = LoggerFactory.getLogger(SolrIndexWriter.class);
   // These should *only* be used for debugging or monitoring purposes
   public static final AtomicLong numOpens = new AtomicLong();
   public static final AtomicLong numCloses = new AtomicLong();

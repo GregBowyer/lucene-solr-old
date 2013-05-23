@@ -57,9 +57,11 @@ import org.slf4j.LoggerFactory;
 import static org.apache.solr.update.processor.DistributingUpdateProcessorFactory.DISTRIB_UPDATE_PARAM;
 import static org.apache.solr.update.processor.DistributedUpdateProcessor.DistribPhase.FROMLEADER;
 
-/** @lucene.experimental */
-public class PeerSync  {
-  public static Logger log = LoggerFactory.getLogger(PeerSync.class);
+/**
+ * @lucene.experimental
+ */
+public class PeerSync {
+  private static final Logger log = LoggerFactory.getLogger(PeerSync.class);
   public boolean debug = log.isDebugEnabled();
 
   private List<String> replicas;

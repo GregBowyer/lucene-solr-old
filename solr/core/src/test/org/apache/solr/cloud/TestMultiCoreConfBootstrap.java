@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TestMultiCoreConfBootstrap extends SolrTestCaseJ4 {
-  protected static Logger log = LoggerFactory.getLogger(TestMultiCoreConfBootstrap.class);
+  private static final Logger log = LoggerFactory.getLogger(TestMultiCoreConfBootstrap.class);
   protected CoreContainer cores = null;
   private String home;
   

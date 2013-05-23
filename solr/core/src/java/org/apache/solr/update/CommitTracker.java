@@ -44,8 +44,8 @@ import org.slf4j.LoggerFactory;
  * Public for tests.
  */
 public final class CommitTracker implements Runnable {
-  protected final static Logger log = LoggerFactory.getLogger(CommitTracker.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(CommitTracker.class);
+
   // scheduler delay for maxDoc-triggered autocommits
   public final int DOC_COMMIT_DELAY_MS = 1;
   

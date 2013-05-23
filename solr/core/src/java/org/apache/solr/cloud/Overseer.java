@@ -52,8 +52,8 @@ public class Overseer {
 
   private static final int STATE_UPDATE_DELAY = 1500;  // delay between cloud state updates
 
-  private static Logger log = LoggerFactory.getLogger(Overseer.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(Overseer.class);
+
   private class ClusterStateUpdater implements Runnable, ClosableThread {
     
     private static final String DELETECORE = "deletecore";

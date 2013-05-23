@@ -45,8 +45,8 @@ import org.slf4j.LoggerFactory;
 public class ZkTestServer {
   public static final int TICK_TIME = 1000;
 
-  private static Logger log = LoggerFactory.getLogger(ZkTestServer.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(ZkTestServer.class);
+
   protected final ZKServerMain zkServer = new ZKServerMain();
 
   private String zkDir;

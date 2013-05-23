@@ -52,8 +52,8 @@ import org.slf4j.LoggerFactory;
  * @since solr 4.0
  */
 public final class ZookeeperInfoServlet extends HttpServlet {
-  static final Logger log = LoggerFactory.getLogger(ZookeeperInfoServlet.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(ZookeeperInfoServlet.class);
+
   @Override
   public void init() {
   }

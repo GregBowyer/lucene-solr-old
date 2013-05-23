@@ -69,7 +69,7 @@ public abstract class AbstractSpatialFieldType<T extends SpatialStrategy> extend
    */
   public static final String FILTER_PARAM = "filter";
 
-  protected final Logger log = LoggerFactory.getLogger( getClass() );
+  private static final Logger log = LoggerFactory.getLogger(AbstractSubTypeFieldType.class);
 
   protected SpatialContext ctx;
   protected SpatialArgsParser argsParser;

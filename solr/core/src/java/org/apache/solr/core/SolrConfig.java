@@ -63,8 +63,8 @@ import java.io.IOException;
  */
 public class SolrConfig extends Config {
 
-  public static final Logger log = LoggerFactory.getLogger(SolrConfig.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(SolrConfig.class);
+
   public static final String DEFAULT_CONF_FILE = "solrconfig.xml";
 
 
@@ -228,7 +228,7 @@ public class SolrConfig extends Config {
 
      updateHandlerInfo = loadUpdatehandlerInfo();
 
-    Config.log.info("Loaded SolrConfig: " + name);
+     log.info("Loaded SolrConfig: " + name);
   }
 
   protected UpdateHandlerInfo loadUpdatehandlerInfo() {

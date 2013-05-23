@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * {@link org.apache.solr.common.util.ContentStream} objects.
  */
 public abstract class ContentStreamHandlerBase extends RequestHandlerBase {
-  public static Logger log = LoggerFactory.getLogger(ContentStreamHandlerBase.class);
+  private static final Logger log = LoggerFactory.getLogger(ContentStreamHandlerBase.class);
 
   @Override
   public void init(NamedList args) {

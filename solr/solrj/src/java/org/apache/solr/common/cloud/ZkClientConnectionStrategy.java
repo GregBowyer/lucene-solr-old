@@ -31,8 +31,8 @@ import org.slf4j.LoggerFactory;
  *
  */
 public abstract class ZkClientConnectionStrategy {
-  private static Logger log = LoggerFactory.getLogger(ZkClientConnectionStrategy.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(ZkClientConnectionStrategy.class);
+
   private List<DisconnectedListener> disconnectedListeners = new ArrayList<DisconnectedListener>();
   private List<ConnectedListener> connectedListeners = new ArrayList<ConnectedListener>();
   

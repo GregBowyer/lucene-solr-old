@@ -47,7 +47,7 @@ import java.util.Map;
  */
 public class ExtractingRequestHandler extends ContentStreamHandlerBase implements SolrCoreAware {
 
-  private transient static Logger log = LoggerFactory.getLogger(ExtractingRequestHandler.class);
+  private transient static final Logger log = LoggerFactory.getLogger(ExtractingRequestHandler.class);
 
   public static final String CONFIG_LOCATION = "tika.config";
   public static final String DATE_FORMATS = "date.formats";

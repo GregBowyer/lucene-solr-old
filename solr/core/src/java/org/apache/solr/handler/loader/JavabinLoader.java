@@ -45,8 +45,8 @@ import java.io.InputStream;
  * @see org.apache.solr.common.util.JavaBinCodec
  */
 public class JavabinLoader extends ContentStreamLoader {
-  public static Logger log = LoggerFactory.getLogger(JavabinLoader.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(JavabinLoader.class);
+
   @Override
   public void load(SolrQueryRequest req, SolrQueryResponse rsp, ContentStream stream, UpdateRequestProcessor processor) throws Exception {
     InputStream is = null;

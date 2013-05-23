@@ -32,7 +32,7 @@ import java.util.Map;
  * @since solr 1.4
  */
 public class LogTransformer extends Transformer {
-  Logger LOG = LoggerFactory.getLogger(LogTransformer.class);
+  private static final Logger LOG = LoggerFactory.getLogger(LogTransformer.class);
 
   @Override
   public Object transformRow(Map<String, Object> row, Context ctx) {

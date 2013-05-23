@@ -51,10 +51,9 @@ import org.slf4j.LoggerFactory;
  * 
  * @since solr 1.2
  */
-public class SystemInfoHandler extends RequestHandlerBase 
-{
-  private static Logger log = LoggerFactory.getLogger(SystemInfoHandler.class);
-  
+public class SystemInfoHandler extends RequestHandlerBase {
+  private static final Logger log = LoggerFactory.getLogger(SystemInfoHandler.class);
+
 
   // on some platforms, resolving canonical hostname can cause the thread
   // to block for several seconds if nameservices aren't available

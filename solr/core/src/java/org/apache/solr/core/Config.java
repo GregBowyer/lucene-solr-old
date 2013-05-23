@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  */
 public class Config {
-  public static final Logger log = LoggerFactory.getLogger(Config.class);
+  private static final Logger log = LoggerFactory.getLogger(Config.class);
   private static final XMLErrorLogger xmllog = new XMLErrorLogger(log);
 
   static final XPathFactory xpathFactory = XPathFactory.newInstance();

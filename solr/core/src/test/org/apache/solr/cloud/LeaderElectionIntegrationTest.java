@@ -45,7 +45,7 @@ import org.xml.sax.SAXException;
 
 @Slow
 public class LeaderElectionIntegrationTest extends SolrTestCaseJ4 {
-  protected static Logger log = LoggerFactory
+  private static final Logger log = LoggerFactory
       .getLogger(AbstractZkTestCase.class);
   
   private final static int NUM_SHARD_REPLICAS = 5;

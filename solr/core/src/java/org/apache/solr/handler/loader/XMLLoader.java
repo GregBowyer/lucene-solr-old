@@ -66,7 +66,7 @@ import java.util.Map;
 
 
 public class XMLLoader extends ContentStreamLoader {
-  public static Logger log = LoggerFactory.getLogger(XMLLoader.class);
+  private static final Logger log = LoggerFactory.getLogger(XMLLoader.class);
   static final XMLErrorLogger xmllog = new XMLErrorLogger(log);
   
   public static final String CONTEXT_TRANSFORMER_KEY = "xsltupdater.transformer";

@@ -399,7 +399,6 @@ sb.append("(group_name=").append(tg.getName()).append(")");
       }
 
 
-
     final org.slf4j.Logger log = LoggerFactory.getLogger(SolrLogFormatter.class);
     log.error("HELLO");
     
@@ -432,7 +431,7 @@ sb.append("(group_name=").append(tg.getName()).append(")");
   
   public static void go() throws Exception {
     final org.slf4j.Logger log = LoggerFactory.getLogger(SolrLogFormatter.class);
- 
+
     Thread thread1 = new Thread() {
       @Override
       public void run() {

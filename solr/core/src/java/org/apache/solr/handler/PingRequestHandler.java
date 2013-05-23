@@ -124,9 +124,8 @@ import org.slf4j.LoggerFactory;
  *
  * @since solr 1.3
  */
-public class PingRequestHandler extends RequestHandlerBase implements SolrCoreAware
-{
-  public static Logger log = LoggerFactory.getLogger(PingRequestHandler.class);
+public class PingRequestHandler extends RequestHandlerBase implements SolrCoreAware {
+  private static final Logger log = LoggerFactory.getLogger(PingRequestHandler.class);
 
   public static final String HEALTHCHECK_FILE_PARAM = "healthcheckFile";
   protected enum ACTIONS {STATUS, ENABLE, DISABLE, PING};

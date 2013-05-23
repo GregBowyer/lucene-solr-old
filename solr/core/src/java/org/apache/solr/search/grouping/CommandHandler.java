@@ -98,7 +98,7 @@ public class CommandHandler {
 
   }
 
-  private final static Logger logger = LoggerFactory.getLogger(CommandHandler.class);
+  private static final Logger logger = LoggerFactory.getLogger(CommandHandler.class);
 
   private final SolrIndexSearcher.QueryCommand queryCommand;
   private final List<Command> commands;

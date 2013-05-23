@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 public class RecoveryZkTest extends AbstractFullDistribZkTestBase {
 
   //private static final String DISTRIB_UPDATE_CHAIN = "distrib-update-chain";
-  private static Logger log = LoggerFactory.getLogger(RecoveryZkTest.class);
+  private static final Logger log = LoggerFactory.getLogger(RecoveryZkTest.class);
   private StopableIndexingThread indexThread;
   private StopableIndexingThread indexThread2;
 

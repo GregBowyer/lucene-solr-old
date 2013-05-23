@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class ConnectionManager implements Watcher {
-  protected static final Logger log = LoggerFactory
+  private static final Logger log = LoggerFactory
       .getLogger(ConnectionManager.class);
 
   private final String name;

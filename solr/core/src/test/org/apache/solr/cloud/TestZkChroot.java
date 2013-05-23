@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TestZkChroot extends SolrTestCaseJ4 {
-  protected static Logger log = LoggerFactory.getLogger(TestZkChroot.class);
+  private static final Logger log = LoggerFactory.getLogger(TestZkChroot.class);
   protected CoreContainer cores = null;
   private String home;
   

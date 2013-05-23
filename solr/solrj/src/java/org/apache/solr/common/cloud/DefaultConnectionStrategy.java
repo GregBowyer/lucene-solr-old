@@ -30,8 +30,8 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultConnectionStrategy extends ZkClientConnectionStrategy {
 
-  private static Logger log = LoggerFactory.getLogger(DefaultConnectionStrategy.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(DefaultConnectionStrategy.class);
+
   @Override
   public void connect(String serverAddress, int timeout, Watcher watcher, ZkUpdate updater) throws IOException, InterruptedException, TimeoutException {
     updater.update(new SolrZooKeeper(serverAddress, timeout, watcher));

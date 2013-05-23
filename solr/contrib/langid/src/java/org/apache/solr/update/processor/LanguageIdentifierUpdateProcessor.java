@@ -50,8 +50,8 @@ import java.util.regex.Pattern;
  */
 public abstract class LanguageIdentifierUpdateProcessor extends UpdateRequestProcessor implements LangIdParams {
 
-  protected final static Logger log = LoggerFactory
-          .getLogger(LanguageIdentifierUpdateProcessor.class);
+  protected static final Logger log = LoggerFactory
+      .getLogger(LanguageIdentifierUpdateProcessor.class);
 
   protected boolean enabled;
 

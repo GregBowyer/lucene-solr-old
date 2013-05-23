@@ -54,7 +54,7 @@ import java.util.Map;
  *
  */
 public abstract class FieldType extends FieldProperties {
-  public static final Logger log = LoggerFactory.getLogger(FieldType.class);
+  protected static final Logger log = LoggerFactory.getLogger(FieldType.class);
 
   /**
    * The default poly field separator.

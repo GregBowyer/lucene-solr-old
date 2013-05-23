@@ -57,7 +57,7 @@ public class SurroundQParserPlugin extends QParserPlugin {
 }
 
 class SurroundQParser extends QParser {
-  protected static final Logger LOG = LoggerFactory .getLogger(SurroundQParser.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SurroundQParser.class);
   static final int DEFMAXBASICQUERIES = 1000;
   static final String MBQParam = "maxBasicQueries";
   

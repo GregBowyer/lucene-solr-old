@@ -42,9 +42,9 @@ import org.slf4j.LoggerFactory;
  * fun, and please share/watch/fork if you think data like this should be free!
  */
 public class OpenExchangeRatesOrgProvider implements ExchangeRateProvider {
-  public static Logger log = LoggerFactory.getLogger(OpenExchangeRatesOrgProvider.class);
-  protected static final String PARAM_RATES_FILE_LOCATION   = "ratesFileLocation";
-  protected static final String PARAM_REFRESH_INTERVAL      = "refreshInterval";
+  private static final Logger log = LoggerFactory.getLogger(OpenExchangeRatesOrgProvider.class);
+  protected static final String PARAM_RATES_FILE_LOCATION = "ratesFileLocation";
+  protected static final String PARAM_REFRESH_INTERVAL = "refreshInterval";
   protected static final String DEFAULT_RATES_FILE_LOCATION = "http://openexchangerates.org/latest.json";
   protected static final String DEFAULT_REFRESH_INTERVAL    = "1440";
   

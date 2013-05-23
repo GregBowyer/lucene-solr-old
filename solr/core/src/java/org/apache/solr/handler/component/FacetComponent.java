@@ -45,9 +45,8 @@ import java.util.*;
  *
  * @since solr 1.3
  */
-public class FacetComponent extends SearchComponent
-{
-  public static Logger log = LoggerFactory.getLogger(FacetComponent.class);
+public class FacetComponent extends SearchComponent {
+  private static final Logger log = LoggerFactory.getLogger(FacetComponent.class);
 
   public static final String COMPONENT_NAME = "facet";
 

@@ -31,9 +31,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class UpdateShardHandler {
-  
-  private static Logger log = LoggerFactory.getLogger(UpdateShardHandler.class);
-  
+
+  private static final Logger log = LoggerFactory.getLogger(UpdateShardHandler.class);
+
   private ThreadPoolExecutor cmdDistribExecutor = new ThreadPoolExecutor(0,
       Integer.MAX_VALUE, 5, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(),
       new DefaultSolrThreadFactory("cmdDistribExecutor"));

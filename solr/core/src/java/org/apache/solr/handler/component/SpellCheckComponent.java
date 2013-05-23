@@ -649,6 +649,9 @@ public class SpellCheckComponent extends SearchComponent implements SolrCoreAwar
   }
 
   private static class SpellCheckerListener implements SolrEventListener {
+
+    private static final Logger log = LoggerFactory.getLogger(SpellCheckerListener.class);
+
     private final SolrCore core;
     private final SolrSpellChecker checker;
     private final boolean buildOnCommit;

@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 
 public class SolrCmdDistributor {
   private static final int MAX_RETRIES_ON_FORWARD = 15;
-  public static Logger log = LoggerFactory.getLogger(SolrCmdDistributor.class);
+  private static final Logger log = LoggerFactory.getLogger(SolrCmdDistributor.class);
 
   static AdjustableSemaphore semaphore = new AdjustableSemaphore(8);
   

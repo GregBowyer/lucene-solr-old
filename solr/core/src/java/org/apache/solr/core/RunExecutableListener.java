@@ -20,6 +20,8 @@ package org.apache.solr.core;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +31,9 @@ import java.util.ArrayList;
 /**
  */
 class RunExecutableListener extends AbstractSolrEventListener {
+
+  private static final Logger log = LoggerFactory.getLogger(RunExecutableListener.class);
+
   public RunExecutableListener(SolrCore core) {
     super(core);
   }

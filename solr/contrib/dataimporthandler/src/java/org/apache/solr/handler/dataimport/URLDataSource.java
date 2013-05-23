@@ -35,11 +35,10 @@ import java.util.regex.Pattern;
  * <p/>
  * <b>This API is experimental and may change in the future.</b>
  *
- *
  * @since solr 1.4
  */
 public class URLDataSource extends DataSource<Reader> {
-  Logger LOG = LoggerFactory.getLogger(URLDataSource.class);
+  private static final Logger LOG = LoggerFactory.getLogger(URLDataSource.class);
 
   private String baseUrl;
 

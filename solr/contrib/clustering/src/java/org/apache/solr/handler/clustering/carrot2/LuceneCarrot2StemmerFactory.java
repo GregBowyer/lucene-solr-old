@@ -50,8 +50,7 @@ import org.tartarus.snowball.ext.TurkishStemmer;
  * in this class.
  */
 public class LuceneCarrot2StemmerFactory implements IStemmerFactory {
-  final static Logger logger = org.slf4j.LoggerFactory
-      .getLogger(LuceneCarrot2StemmerFactory.class);
+  private static final Logger logger = org.slf4j.LoggerFactory.getLogger(LuceneCarrot2StemmerFactory.class);
 
   @Override
   public IStemmer getStemmer(LanguageCode language) {

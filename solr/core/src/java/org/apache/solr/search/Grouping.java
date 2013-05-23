@@ -58,7 +58,7 @@ import java.util.*;
  */
 public class Grouping {
 
-  private final static Logger logger = LoggerFactory.getLogger(Grouping.class);
+  private static final Logger logger = LoggerFactory.getLogger(Grouping.class);
 
   private final SolrIndexSearcher searcher;
   private final SolrIndexSearcher.QueryResult qr;

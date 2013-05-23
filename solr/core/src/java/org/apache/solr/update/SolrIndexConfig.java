@@ -35,8 +35,8 @@ import java.util.List;
  * defined in the &lt;indexConfig&gt; section of solrconfig.xml
  */
 public class SolrIndexConfig {
-  public static final Logger log = LoggerFactory.getLogger(SolrIndexConfig.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(SolrIndexConfig.class);
+
   final String defaultMergePolicyClassName;
   public static final String DEFAULT_MERGE_SCHEDULER_CLASSNAME = ConcurrentMergeScheduler.class.getName();
   public final Version luceneVersion;

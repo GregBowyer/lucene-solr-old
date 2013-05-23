@@ -57,7 +57,7 @@ public class UpdateLog implements PluginInfoInitialized {
   public static String LOG_FILENAME_PATTERN = "%s.%019d";
   public static String TLOG_NAME="tlog";
 
-  public static Logger log = LoggerFactory.getLogger(UpdateLog.class);
+  private static final Logger log = LoggerFactory.getLogger(UpdateLog.class);
   public boolean debug = log.isDebugEnabled();
   public boolean trace = log.isTraceEnabled();
 

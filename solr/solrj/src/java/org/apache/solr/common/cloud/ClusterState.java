@@ -43,8 +43,8 @@ import org.slf4j.LoggerFactory;
  * @lucene.experimental
  */
 public class ClusterState implements JSONWriter.Writable {
-  private static Logger log = LoggerFactory.getLogger(ClusterState.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(ClusterState.class);
+
   private Integer zkClusterStateVersion;
   
   private final Map<String, DocCollection> collectionStates;  // Map<collectionName, Map<sliceName,Slice>>

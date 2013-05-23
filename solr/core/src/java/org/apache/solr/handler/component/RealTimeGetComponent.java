@@ -63,9 +63,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class RealTimeGetComponent extends SearchComponent
-{
-  public static Logger log = LoggerFactory.getLogger(UpdateLog.class);
+public class RealTimeGetComponent extends SearchComponent {
+  private static final Logger log = LoggerFactory.getLogger(UpdateLog.class);
   public static final String COMPONENT_NAME = "get";
 
   @Override

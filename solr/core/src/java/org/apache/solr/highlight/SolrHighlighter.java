@@ -34,9 +34,8 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.DocList;
 import org.apache.solr.util.SolrPluginUtils;
 
-public abstract class SolrHighlighter
-{
-  public static Logger log = LoggerFactory.getLogger(SolrHighlighter.class);
+public abstract class SolrHighlighter {
+  private static final Logger log = LoggerFactory.getLogger(SolrHighlighter.class);
 
   // Thread safe registry
   protected final Map<String,SolrFormatter> formatters =

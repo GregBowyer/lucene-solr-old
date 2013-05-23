@@ -27,6 +27,8 @@ import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -34,6 +36,9 @@ import java.util.List;
  *
  */
 public class QuerySenderListener extends AbstractSolrEventListener {
+
+  private static final Logger log = LoggerFactory.getLogger(QuerySenderListener.class);
+
   public QuerySenderListener(SolrCore core) {
     super(core);
   }

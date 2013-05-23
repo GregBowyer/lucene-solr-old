@@ -38,7 +38,7 @@ public class TestEmbeddedSolrServer extends AbstractEmbeddedSolrServerTestCase {
   public TestRule solrTestRules = 
     RuleChain.outerRule(new SystemPropertiesRestoreRule());
 
-  protected static Logger log = LoggerFactory.getLogger(TestEmbeddedSolrServer.class);
+  private static final Logger log = LoggerFactory.getLogger(TestEmbeddedSolrServer.class);
 
   @Override
   protected EmbeddedSolrServer getSolrCore1() {

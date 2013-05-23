@@ -35,8 +35,8 @@ import com.carrotsearch.randomizedtesting.annotations.ThreadLeakFilters;
 
 @ThreadLeakFilters(defaultFilters = true, filters = {SolrIgnoredThreadsFilter.class})
 public class TestCoreAdmin extends AbstractEmbeddedSolrServerTestCase {
-  protected static Logger log = LoggerFactory.getLogger(TestCoreAdmin.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(TestCoreAdmin.class);
+
   private static final String SOLR_XML = "solr.xml";
 
   private static String tempDirProp;

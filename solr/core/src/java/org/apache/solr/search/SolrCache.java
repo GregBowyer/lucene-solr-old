@@ -29,8 +29,8 @@ import org.slf4j.LoggerFactory;
  * 
  *
  */
-public interface SolrCache<K,V> extends SolrInfoMBean {
-  public final static Logger log = LoggerFactory.getLogger(SolrCache.class);
+public interface SolrCache<K, V> extends SolrInfoMBean {
+  public static final Logger log = LoggerFactory.getLogger(SolrCache.class);
 
 
   /**

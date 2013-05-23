@@ -52,10 +52,9 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequestBase;
 
 
-public class SolrRequestParsers 
-{
-  final Logger log = LoggerFactory.getLogger(SolrRequestParsers.class);
-  
+public class SolrRequestParsers {
+  private static final Logger log = LoggerFactory.getLogger(SolrRequestParsers.class);
+
   // Should these constants be in a more public place?
   public static final String MULTIPART = "multipart";
   public static final String FORMDATA = "formdata";

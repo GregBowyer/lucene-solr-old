@@ -37,8 +37,7 @@ import org.slf4j.LoggerFactory;
 
 public class TestWriterPerf extends AbstractSolrTestCase {
 
-  public static final Logger log 
-    = LoggerFactory.getLogger(TestWriterPerf.class);
+  private static final Logger log = LoggerFactory.getLogger(TestWriterPerf.class);
 
   @BeforeClass
   public static void beforeClass() throws Exception {

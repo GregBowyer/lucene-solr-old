@@ -64,7 +64,7 @@ public class LogUpdateProcessorFactory extends UpdateRequestProcessorFactory {
 }
 
 class LogUpdateProcessor extends UpdateRequestProcessor {
-  public final static Logger log = LoggerFactory.getLogger(LogUpdateProcessor.class);
+  public static final Logger log = LoggerFactory.getLogger(LogUpdateProcessor.class);
 
   private final SolrQueryRequest req;
   private final SolrQueryResponse rsp;

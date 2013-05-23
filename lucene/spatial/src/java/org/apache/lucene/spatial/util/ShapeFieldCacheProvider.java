@@ -36,7 +36,7 @@ import java.util.logging.Logger;
  * @lucene.internal
  */
 public abstract class ShapeFieldCacheProvider<T extends Shape> {
-  private Logger log = Logger.getLogger(getClass().getName());
+  private static final Logger log = Logger.getLogger(ShapeFieldCacheProvider.class.getName());
 
   // it may be a List<T> or T
   WeakHashMap<IndexReader, ShapeFieldCache<T>> sidx = new WeakHashMap<IndexReader, ShapeFieldCache<T>>();

@@ -40,8 +40,7 @@ import org.slf4j.Logger;
  * Lucene APIs need to change, the changes can be made in this class.
  */
 public class LuceneCarrot2TokenizerFactory implements ITokenizerFactory {
-  final static Logger logger = org.slf4j.LoggerFactory
-      .getLogger(LuceneCarrot2TokenizerFactory.class);
+  private static final Logger logger = org.slf4j.LoggerFactory.getLogger(LuceneCarrot2TokenizerFactory.class);
 
   @Override
   public ITokenizer getTokenizer(LanguageCode language) {

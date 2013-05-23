@@ -329,8 +329,8 @@ public class FileFloatSource extends ValueSource {
   }
 
   public static class ReloadCacheRequestHandler extends RequestHandlerBase {
-    
-    static final Logger log = LoggerFactory.getLogger(ReloadCacheRequestHandler.class);
+
+    private static final Logger log = LoggerFactory.getLogger(ReloadCacheRequestHandler.class);
 
     @Override
     public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp)

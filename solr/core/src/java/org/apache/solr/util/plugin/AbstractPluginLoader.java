@@ -36,10 +36,9 @@ import org.w3c.dom.NodeList;
  *
  * @since solr 1.3
  */
-public abstract class AbstractPluginLoader<T>
-{
-  public static Logger log = LoggerFactory.getLogger(AbstractPluginLoader.class);
-  
+public abstract class AbstractPluginLoader<T> {
+  private static final Logger log = LoggerFactory.getLogger(AbstractPluginLoader.class);
+
   private final String type;
   private final boolean preRegister;
   private final boolean requireName;

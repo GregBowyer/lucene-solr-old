@@ -25,8 +25,8 @@ import org.slf4j.LoggerFactory;
 
 
 public class ExecutorUtil {
-  public static Logger log = LoggerFactory.getLogger(ExecutorUtil.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(ExecutorUtil.class);
+
   public static void shutdownNowAndAwaitTermination(ExecutorService pool) {
     pool.shutdown(); // Disable new tasks from being submitted
     pool.shutdownNow(); // Cancel currently executing tasks

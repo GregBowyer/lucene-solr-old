@@ -64,10 +64,9 @@ import org.apache.solr.search.QParserPlugin;
 
 /**
  * @since solr 1.3
- */ 
-public class SolrResourceLoader implements ResourceLoader
-{
-  public static final Logger log = LoggerFactory.getLogger(SolrResourceLoader.class);
+ */
+public class SolrResourceLoader implements ResourceLoader {
+  protected static final Logger log = LoggerFactory.getLogger(SolrResourceLoader.class);
 
   static final String project = "solr";
   static final String base = "org.apache" + "." + project;

@@ -47,8 +47,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ZkStateReader {
-  private static Logger log = LoggerFactory.getLogger(ZkStateReader.class);
-  
+  private static final Logger log = LoggerFactory.getLogger(ZkStateReader.class);
+
   public static final String BASE_URL_PROP = "base_url";
   public static final String NODE_NAME_PROP = "node_name";
   public static final String ROLES_PROP = "roles";

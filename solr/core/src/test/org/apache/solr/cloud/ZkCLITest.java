@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 // TODO: This test would be a lot faster if it used a solrhome with fewer config
 // files - there are a lot of them to upload
 public class ZkCLITest extends SolrTestCaseJ4 {
-  protected static Logger log = LoggerFactory
+  private static final Logger log = LoggerFactory
       .getLogger(AbstractZkTestCase.class);
   
   private static final boolean VERBOSE = false;

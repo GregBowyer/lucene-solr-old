@@ -75,9 +75,9 @@ public class HttpSolrServer extends SolrServer {
    */
   public static final String AGENT = "Solr[" + HttpSolrServer.class.getName()
       + "] 1.0";
-  
-  private static Logger log = LoggerFactory.getLogger(HttpSolrServer.class);
-  
+
+  private static final Logger log = LoggerFactory.getLogger(HttpSolrServer.class);
+
   /**
    * The URL of the Solr server.
    */

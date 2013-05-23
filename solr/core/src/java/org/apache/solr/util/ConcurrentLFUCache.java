@@ -41,7 +41,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @since solr 1.6
  */
 public class ConcurrentLFUCache<K, V> {
-  private static Logger log = LoggerFactory.getLogger(ConcurrentLFUCache.class);
+  private static final Logger log = LoggerFactory.getLogger(ConcurrentLFUCache.class);
 
   private final ConcurrentHashMap<Object, CacheEntry<K, V>> map;
   private final int upperWaterMark, lowerWaterMark;
