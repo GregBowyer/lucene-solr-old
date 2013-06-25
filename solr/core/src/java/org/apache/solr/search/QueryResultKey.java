@@ -20,6 +20,8 @@ package org.apache.solr.search;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
+import org.apache.solr.handler.component.CollectorSpec;
+
 import java.util.List;
 
 /** A hash key encapsulating a query, a list of filters, and a sort
@@ -28,6 +30,7 @@ import java.util.List;
 public final class QueryResultKey {
   final Query query;
   final Sort sort;
+  final CollectorSpec collectorSpec;
   final SortField[] sfields;
   final List<Query> filters;
   final int nc_flags;  // non-comparable flags... ignored by hashCode and equals
@@ -37,10 +40,11 @@ public final class QueryResultKey {
   private static SortField[] defaultSort = new SortField[0];
 
 
-  public QueryResultKey(Query query, List<Query> filters, Sort sort, int nc_flags) {
+  public QueryResultKey(Query query, List<Query> filters, Sort sort, CollectorSpec collectorSpec, int nc_flags) {
     this.query = query;
     this.sort = sort;
     this.filters = filters;
+    this.collectorSpec = collectorSpec;
     this.nc_flags = nc_flags;
 
     int h = query.hashCode();
@@ -55,6 +59,7 @@ public final class QueryResultKey {
       h = h*29 + sf.hashCode();
     }
 
+    h += collectorSpec.hashCode();
     hc = h;
   }
 
@@ -86,9 +91,17 @@ public final class QueryResultKey {
       if (!sf1.equals(sf2)) return false;
     }
 
+    CollectorSpec otherCollectorSpec = other.getCollectorSpec();
+    if(!collectorSpec.equals(otherCollectorSpec)) {
+        return false;
+    }
+
     return true;
   }
 
+  public CollectorSpec getCollectorSpec() {
+      return this.collectorSpec;
+  }
 
   private static boolean isEqual(Object o1, Object o2) {
     if (o1==o2) return true;  // takes care of identity and null cases

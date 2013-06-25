@@ -91,6 +91,8 @@ import org.apache.solr.core.DirectoryFactory.DirContext;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.core.SolrInfoMBean;
+import org.apache.solr.handler.component.CollectorSpec;
+import org.apache.solr.handler.component.ResponseBuilder;
 import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestInfo;
@@ -1243,7 +1245,7 @@ public class SolrIndexSearcher extends IndexSearcher implements Closeable,SolrIn
     {
         // all of the current flags can be reused during warming,
         // so set all of them on the cache key.
-        key = new QueryResultKey(q, cmd.getFilterList(), cmd.getSort(), flags);
+        key = new QueryResultKey(q, cmd.getFilterList(), cmd.getSort(), cmd.getCollectorSpec(), flags);
         if ((flags & NO_CHECK_QCACHE)==0) {
           superset = queryResultCache.get(key);
 
@@ -1345,7 +1347,7 @@ public class SolrIndexSearcher extends IndexSearcher implements Closeable,SolrIn
 
     // lastly, put the superset in the cache if the size is less than or equal
     // to queryResultMaxDocsCached
-    if (key != null && superset.size() <= queryResultMaxDocsCached && !qr.isPartialResults()) {
+    if (key != null && superset.size() <= queryResultMaxDocsCached && !qr.isPartialResults() && cmd.getCollectorSpec().getDelegating() == null) {
       queryResultCache.put(key, superset);
     }
   }
@@ -2097,6 +2099,7 @@ public class SolrIndexSearcher extends IndexSearcher implements Closeable,SolrIn
    * if we want to pass additional information to the searcher.
    */
   public static class QueryCommand {
+    private static final CollectorSpec DEFAULT_COLLECTOR_SPEC = new CollectorSpec("default");
     private Query query;
     private List<Query> filterList;
     private DocSet filter;
@@ -2106,6 +2109,8 @@ public class SolrIndexSearcher extends IndexSearcher implements Closeable,SolrIn
     private int supersetMaxDoc;
     private int flags;
     private long timeAllowed = -1;
+    private CollectorSpec collectorSpec = DEFAULT_COLLECTOR_SPEC;
+    private ResponseBuilder responseBuilder;
     //Issue 1726 start
     private ScoreDoc scoreDoc;
     
@@ -2164,6 +2169,24 @@ public class SolrIndexSearcher extends IndexSearcher implements Closeable,SolrIn
       }
       this.filter = filter;
       return this;
+    }
+
+    public QueryCommand setCollectorSpec(CollectorSpec collectorSpec) {
+      this.collectorSpec = collectorSpec;
+      return this;
+    }
+
+    public QueryCommand setResponseBuilder(ResponseBuilder responseBuilder) {
+      this.responseBuilder = responseBuilder;
+      return this;
+    }
+
+    public ResponseBuilder getResponseBuilder () {
+      return this.responseBuilder;
+    }
+
+    public CollectorSpec getCollectorSpec() {
+      return this.collectorSpec;
     }
 
     public Sort getSort() { return sort; }

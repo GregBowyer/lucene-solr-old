@@ -35,13 +35,11 @@ import org.apache.lucene.search.grouping.TopGroups;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.CharsRef;
 import org.apache.lucene.util.UnicodeUtil;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.*;
 import org.apache.solr.common.util.NamedList;
-import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.common.util.StrUtils;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.ResultContext;
@@ -59,7 +57,6 @@ import org.apache.solr.search.QueryParsing;
 import org.apache.solr.search.ReturnFields;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.search.SolrReturnFields;
-import org.apache.solr.search.SortSpec;
 import org.apache.solr.search.SyntaxError;
 import org.apache.solr.search.grouping.CommandHandler;
 import org.apache.solr.search.grouping.GroupingSpecification;
@@ -83,8 +80,6 @@ import org.apache.solr.search.grouping.endresulttransformer.SimpleEndResultTrans
 import org.apache.solr.util.SolrPluginUtils;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -148,7 +143,9 @@ public class QueryComponent extends SearchComponent
       rb.setSortSpec( parser.getSort(true) );
       rb.setQparser(parser);
       rb.setScoreDoc(parser.getPaging());
-      
+      rb.setCollectorSpec(getCollectorSpec(params));     
+
+ 
       String[] fqs = req.getParams().getParams(CommonParams.FQ);
       if (fqs!=null && fqs.length!=0) {
         List<Query> filters = rb.getFilters();
@@ -221,7 +218,63 @@ public class QueryComponent extends SearchComponent
     groupingSpec.setTruncateGroups(params.getBool(GroupParams.GROUP_TRUNCATE, false));
   }
 
+  private void parseCollectorSpec(CollectorSpec collectorSpec, String signiture) throws SyntaxError {
 
+    Map<String, String> localParams = new HashMap<String, String>();
+    if(signiture.startsWith("{!")) {
+        int endParams = signiture.indexOf("}");
+        String name =   signiture.substring(endParams+1);
+        String params = signiture.substring(0, endParams+1);
+        QueryParsing.parseLocalParams(params, 0, localParams, null, "{!", '}');
+        collectorSpec.setName(name);
+        collectorSpec.setSigniture(signiture);
+        collectorSpec.setParams(localParams);
+
+        if(localParams.containsKey("v")) {
+            collectorSpec.setName(localParams.get("v"));
+        }
+
+        if(localParams.containsKey("id")) {
+            collectorSpec.setId(Integer.parseInt(localParams.get("id")));
+        }
+
+    } else {
+        collectorSpec.setName(signiture);
+        collectorSpec.setSigniture(signiture);
+        collectorSpec.setParams(localParams);
+    }
+  }
+
+  private CollectorSpec getCollectorSpec(SolrParams params) throws SyntaxError {
+
+    boolean on = params.getBool(CollectorParams.COLLECTOR, false);
+    if(on) {
+        CollectorSpec topDocsSpec = new CollectorSpec();
+        String topDocsSigniture = params.get(CollectorParams.TOPDOCS);
+        if(topDocsSigniture != null) {
+            parseCollectorSpec(topDocsSpec, topDocsSigniture);
+        } else {
+            parseCollectorSpec(topDocsSpec, "default");
+        }
+
+        String[] del = params.getParams(CollectorParams.DELEGATING);
+        if(del != null) {
+            CollectorSpec[] delegating = new CollectorSpec[del.length];
+            for(int i=0; i<delegating.length; i++) {
+                CollectorSpec d = new CollectorSpec();
+                parseCollectorSpec(d, del[i]);
+                delegating[i] = d;
+            }
+            Arrays.sort(delegating);
+            topDocsSpec.setDelegating(delegating);
+        }
+        return topDocsSpec;
+    } else {
+        CollectorSpec topDocsSpec = new CollectorSpec();
+        parseCollectorSpec(topDocsSpec, "default");
+        return topDocsSpec;
+    }
+  }
 
   /**
    * Actually run the query
@@ -647,7 +700,17 @@ public class QueryComponent extends SearchComponent
 
   private void handleRegularResponses(ResponseBuilder rb, ShardRequest sreq) {
     if ((sreq.purpose & ShardRequest.PURPOSE_GET_TOP_IDS) != 0) {
-      mergeIds(rb, sreq);
+      CollectorSpec collectorSpec = rb.getCollectorSpec();
+      CollectorFactory collectorFactory = rb.getRequest().getCore().getCollectorFactory(collectorSpec.getName());
+      collectorFactory.merge(rb, sreq);
+      CollectorSpec[] delegating = collectorSpec.getDelegating();
+      if(delegating != null) {
+        for(int i=0; i<delegating.length; i++) {
+            collectorFactory = rb.getRequest().getCore().getCollectorFactory(delegating[i].getName());
+            collectorFactory.setOrdinal(delegating[i].getId());
+            collectorFactory.merge(rb, sreq);
+        }
+      }
     }
 
     if ((sreq.purpose & ShardRequest.PURPOSE_GET_FIELDS) != 0) {
@@ -765,165 +828,6 @@ public class QueryComponent extends SearchComponent
     rb.addRequest(this, sreq);
   }
 
-
-
-
-
-  private void mergeIds(ResponseBuilder rb, ShardRequest sreq) {
-      SortSpec ss = rb.getSortSpec();
-      Sort sort = ss.getSort();
-
-      SortField[] sortFields = null;
-      if(sort != null) sortFields = sort.getSort();
-      else {
-        sortFields = new SortField[]{SortField.FIELD_SCORE};
-      }
- 
-      SchemaField uniqueKeyField = rb.req.getSchema().getUniqueKeyField();
-
-
-      // id to shard mapping, to eliminate any accidental dups
-      HashMap<Object,String> uniqueDoc = new HashMap<Object,String>();    
-
-      // Merge the docs via a priority queue so we don't have to sort *all* of the
-      // documents... we only need to order the top (rows+start)
-      ShardFieldSortedHitQueue queue;
-      queue = new ShardFieldSortedHitQueue(sortFields, ss.getOffset() + ss.getCount());
-
-      NamedList<Object> shardInfo = null;
-      if(rb.req.getParams().getBool(ShardParams.SHARDS_INFO, false)) {
-        shardInfo = new SimpleOrderedMap<Object>();
-        rb.rsp.getValues().add(ShardParams.SHARDS_INFO,shardInfo);
-      }
-      
-      long numFound = 0;
-      Float maxScore=null;
-      boolean partialResults = false;
-      for (ShardResponse srsp : sreq.responses) {
-        SolrDocumentList docs = null;
-
-        if(shardInfo!=null) {
-          SimpleOrderedMap<Object> nl = new SimpleOrderedMap<Object>();
-          
-          if (srsp.getException() != null) {
-            Throwable t = srsp.getException();
-            if(t instanceof SolrServerException) {
-              t = ((SolrServerException)t).getCause();
-            }
-            nl.add("error", t.toString() );
-            StringWriter trace = new StringWriter();
-            t.printStackTrace(new PrintWriter(trace));
-            nl.add("trace", trace.toString() );
-          }
-          else {
-            docs = (SolrDocumentList)srsp.getSolrResponse().getResponse().get("response");
-            nl.add("numFound", docs.getNumFound());
-            nl.add("maxScore", docs.getMaxScore());
-          }
-          if(srsp.getSolrResponse()!=null) {
-            nl.add("time", srsp.getSolrResponse().getElapsedTime());
-          }
-
-          shardInfo.add(srsp.getShard(), nl);
-        }
-        // now that we've added the shard info, let's only proceed if we have no error.
-        if (srsp.getException() != null) {
-          continue;
-        }
-
-        if (docs == null) { // could have been initialized in the shards info block above
-          docs = (SolrDocumentList)srsp.getSolrResponse().getResponse().get("response");
-        }
-        
-        NamedList<?> responseHeader = (NamedList<?>)srsp.getSolrResponse().getResponse().get("responseHeader");
-        if (responseHeader != null && Boolean.TRUE.equals(responseHeader.get("partialResults"))) {
-          partialResults = true;
-        }
-        
-        // calculate global maxScore and numDocsFound
-        if (docs.getMaxScore() != null) {
-          maxScore = maxScore==null ? docs.getMaxScore() : Math.max(maxScore, docs.getMaxScore());
-        }
-        numFound += docs.getNumFound();
-
-        NamedList sortFieldValues = (NamedList)(srsp.getSolrResponse().getResponse().get("sort_values"));
-
-        // go through every doc in this response, construct a ShardDoc, and
-        // put it in the priority queue so it can be ordered.
-        for (int i=0; i<docs.size(); i++) {
-          SolrDocument doc = docs.get(i);
-          Object id = doc.getFieldValue(uniqueKeyField.getName());
-
-          String prevShard = uniqueDoc.put(id, srsp.getShard());
-          if (prevShard != null) {
-            // duplicate detected
-            numFound--;
-
-            // For now, just always use the first encountered since we can't currently
-            // remove the previous one added to the priority queue.  If we switched
-            // to the Java5 PriorityQueue, this would be easier.
-            continue;
-            // make which duplicate is used deterministic based on shard
-            // if (prevShard.compareTo(srsp.shard) >= 0) {
-            //  TODO: remove previous from priority queue
-            //  continue;
-            // }
-          }
-
-          ShardDoc shardDoc = new ShardDoc();
-          shardDoc.id = id;
-          shardDoc.shard = srsp.getShard();
-          shardDoc.orderInShard = i;
-          Object scoreObj = doc.getFieldValue("score");
-          if (scoreObj != null) {
-            if (scoreObj instanceof String) {
-              shardDoc.score = Float.parseFloat((String)scoreObj);
-            } else {
-              shardDoc.score = (Float)scoreObj;
-            }
-          }
-
-          shardDoc.sortFieldValues = sortFieldValues;
-
-          queue.insertWithOverflow(shardDoc);
-        } // end for-each-doc-in-response
-      } // end for-each-response
-      
-      // The queue now has 0 -> queuesize docs, where queuesize <= start + rows
-      // So we want to pop the last documents off the queue to get
-      // the docs offset -> queuesize
-      int resultSize = queue.size() - ss.getOffset();
-      resultSize = Math.max(0, resultSize);  // there may not be any docs in range
-
-      Map<Object,ShardDoc> resultIds = new HashMap<Object,ShardDoc>();
-      for (int i=resultSize-1; i>=0; i--) {
-        ShardDoc shardDoc = queue.pop();
-        shardDoc.positionInResponse = i;
-        // Need the toString() for correlation with other lists that must
-        // be strings (like keys in highlighting, explain, etc)
-        resultIds.put(shardDoc.id.toString(), shardDoc);
-      }
-
-      // Add hits for distributed requests
-      // https://issues.apache.org/jira/browse/SOLR-3518
-      rb.rsp.addToLog("hits", numFound);
-
-      SolrDocumentList responseDocs = new SolrDocumentList();
-      if (maxScore!=null) responseDocs.setMaxScore(maxScore);
-      responseDocs.setNumFound(numFound);
-      responseDocs.setStart(ss.getOffset());
-      // size appropriately
-      for (int i=0; i<resultSize; i++) responseDocs.add(null);
-
-      // save these results in a private area so we can access them
-      // again when retrieving stored fields.
-      // TODO: use ResponseBuilder (w/ comments) or the request context?
-      rb.resultIds = resultIds;
-      rb._responseDocs = responseDocs;
-      if (partialResults) {
-        rb.rsp.getResponseHeader().add( "partialResults", Boolean.TRUE );
-      }
-  }
 
   private void createRetrieveDocs(ResponseBuilder rb) {
 
