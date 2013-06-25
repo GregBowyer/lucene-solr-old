@@ -28,6 +28,7 @@ import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
 import org.apache.solr.SolrTestCaseJ4;
+import org.apache.solr.handler.component.CollectorSpec;
 import org.apache.solr.search.QueryResultKey;
 import org.junit.Test;
 
@@ -45,13 +46,15 @@ public class QueryResultKeyTest extends SolrTestCaseJ4 {
     
     BooleanQuery query = new BooleanQuery();
     query.add(new TermQuery(new Term("test", "field")), Occur.MUST);
+
+    CollectorSpec collectorSpec = null;
     
-    QueryResultKey qrk1 = new QueryResultKey(query , filters, sort, 1);
+    QueryResultKey qrk1 = new QueryResultKey(query , filters, sort, collectorSpec, 1);
     
     List<Query> filters2 = new ArrayList<Query>();
     filters2.add(new TermQuery(new Term("test2", "field2")));
     filters2.add(new TermQuery(new Term("test", "field")));
-    QueryResultKey qrk2 = new QueryResultKey(query , filters2, sort, 1);
+    QueryResultKey qrk2 = new QueryResultKey(query , filters2, sort, collectorSpec, 1);
     
     assertEquals(qrk1.hashCode(), qrk2.hashCode());
   }
