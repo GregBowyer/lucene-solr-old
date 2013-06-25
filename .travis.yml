@@ -1,0 +1,15 @@
+# This defines what travis-ci installs, not what runs
+language: java
+
+script:
+    - ant ivy-bootstrap
+    - ant compile
+    - ant test
+
+notification:
+    email: 
+        recipients:
+            - gbowyer@fastmail.co.uk
+        on_success: always
+        on_failure: always
+
