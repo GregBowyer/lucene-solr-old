@@ -17,17 +17,12 @@
 
 package org.apache.solr.core;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.BooleanFilter;
-import org.apache.lucene.queries.FilterClause;
 import org.apache.lucene.queries.TermFilter;
 import org.apache.lucene.queries.TermsFilter;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.QueryWrapperFilter;
 import org.apache.lucene.search.Sort;

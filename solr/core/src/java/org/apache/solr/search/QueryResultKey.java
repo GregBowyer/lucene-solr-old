@@ -68,11 +68,6 @@ public final class QueryResultKey {
     if (!(o instanceof QueryResultKey)) return false;
     QueryResultKey other = (QueryResultKey)o;
 
-    // fast check of the whole hash code... most hash tables will only use
-    // some of the bits, so if this is a hash collision, it's still likely
-    // that the full cached hash code will be different.
-    if (this.hc != other.hc) return false;
-
     // check for the thing most likely to be different (and the fastest things)
     // first.
     if (this.sfields.length != other.sfields.length) return false;
