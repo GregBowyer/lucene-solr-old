@@ -22,7 +22,7 @@ import java.io.IOException;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.lucene.util.LuceneTestCase.Slow;
 import org.apache.solr.cloud.BasicDistributedZk2Test;
-import org.apache.solr.util.BadHdfsThreadsFilter;
+import org.apache.lucene.util.BadHdfsThreadsFilter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 

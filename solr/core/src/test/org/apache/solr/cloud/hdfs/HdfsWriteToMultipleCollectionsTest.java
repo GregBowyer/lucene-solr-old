@@ -19,6 +19,7 @@ package org.apache.solr.cloud.hdfs;
 
 import com.carrotsearch.randomizedtesting.annotations.ThreadLeakFilters;
 
+
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.NRTCachingDirectory;
@@ -34,11 +35,11 @@ import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.HdfsDirectoryFactory;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.servlet.SolrDispatchFilter;
-import org.apache.solr.store.blockcache.BlockCache;
-import org.apache.solr.store.blockcache.BlockDirectory;
-import org.apache.solr.store.blockcache.BlockDirectoryCache;
-import org.apache.solr.store.blockcache.Cache;
-import org.apache.solr.util.BadHdfsThreadsFilter;
+import org.apache.lucene.store.blockcache.BlockCache;
+import org.apache.lucene.store.blockcache.BlockDirectory;
+import org.apache.lucene.store.blockcache.BlockDirectoryCache;
+import org.apache.lucene.store.blockcache.Cache;
+import org.apache.lucene.util.BadHdfsThreadsFilter;
 import org.apache.solr.util.RefCounted;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

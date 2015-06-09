@@ -23,7 +23,7 @@ import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.lucene.util.LuceneTestCase.Slow;
 import org.apache.solr.cloud.CollectionsAPIDistributedZkTest;
 import org.apache.solr.update.HdfsUpdateLog;
-import org.apache.solr.util.BadHdfsThreadsFilter;
+import org.apache.lucene.util.BadHdfsThreadsFilter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 

@@ -46,7 +46,7 @@ import org.apache.solr.common.params.CollectionParams;
 import org.apache.solr.common.params.MapSolrParams;
 import org.apache.solr.common.util.ExecutorUtil;
 import org.apache.solr.util.DefaultSolrThreadFactory;
-import org.apache.solr.util.BadHdfsThreadsFilter;
+import org.apache.lucene.util.BadHdfsThreadsFilter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

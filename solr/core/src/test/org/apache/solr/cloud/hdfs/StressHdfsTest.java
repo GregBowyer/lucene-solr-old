@@ -36,7 +36,7 @@ import org.apache.solr.cloud.ChaosMonkey;
 import org.apache.solr.common.params.CollectionParams.CollectionAction;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.util.NamedList;
-import org.apache.solr.util.BadHdfsThreadsFilter;
+import org.apache.lucene.util.BadHdfsThreadsFilter;
 import org.apache.zookeeper.KeeperException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

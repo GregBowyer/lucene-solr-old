@@ -92,7 +92,7 @@ public abstract class SolrCacheBase {
    * Returns a "Hit Ratio" (ie: max of 1.00, not a percentage) suitable for 
    * display purposes.
    */
-  protected static float calcHitRatio(long lookups, long hits) {
+  public static float calcHitRatio(long lookups, long hits) {
     return (lookups == 0) ? 0.0f :
         BigDecimal.valueOf((double) hits / (double) lookups)
             .setScale(2, RoundingMode.HALF_EVEN)

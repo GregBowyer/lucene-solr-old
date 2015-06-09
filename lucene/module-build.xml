@@ -497,6 +497,17 @@
     <property name="grouping-javadocs.uptodate" value="true"/>
   </target>
 
+  <property name="hadoop.jar" value="${common.dir}/build/hadoop/lucene-hadoop-${version}.jar"/>
+  <target name="check-hadoop-uptodate" unless="hadoop.uptodate">
+    <module-uptodate name="hadoop" jarfile="${hadoop.jar}" property="hadoop.uptodate"/>
+  </target>
+  <target name="jar-hadoop" unless="hadoop.uptodate" depends="check-hadoop-uptodate">
+    <ant dir="${common.dir}/hadoop" target="jar-core" inheritall="false">
+      <propertyset refid="uptodate.and.compiled.properties"/>
+    </ant>
+    <property name="hadoop.uptodate" value="true"/>
+  </target>
+
   <property name="highlighter.jar" value="${common.dir}/build/highlighter/lucene-highlighter-${version}.jar"/>
   <target name="check-highlighter-uptodate" unless="highlighter.uptodate">
     <module-uptodate name="highlighter" jarfile="${highlighter.jar}" property="highlighter.uptodate"/>

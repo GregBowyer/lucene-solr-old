@@ -27,6 +27,7 @@
       <module group="Lucene/Other" filepath="$PROJECT_DIR$/lucene/expressions/expressions.iml" />
       <module group="Lucene/Other" filepath="$PROJECT_DIR$/lucene/facet/facet.iml" />
       <module group="Lucene/Other" filepath="$PROJECT_DIR$/lucene/grouping/grouping.iml" />
+      <module group="Lucene/Other" filepath="$PROJECT_DIR$/lucene/hadoop/hadoop.iml" />
       <module group="Lucene/Other" filepath="$PROJECT_DIR$/lucene/highlighter/highlighter.iml" />
       <module group="Lucene/Other" filepath="$PROJECT_DIR$/lucene/join/join.iml" />
       <module group="Lucene/Other" filepath="$PROJECT_DIR$/lucene/memory/memory.iml" />

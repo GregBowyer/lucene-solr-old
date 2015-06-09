@@ -40,20 +40,21 @@ import org.apache.lucene.store.LockFactory;
 import org.apache.lucene.store.NRTCachingDirectory;
 import org.apache.lucene.store.NoLockFactory;
 import org.apache.lucene.store.SingleInstanceLockFactory;
+import org.apache.lucene.store.blockcache.BlockCache;
+import org.apache.lucene.store.blockcache.BlockDirectory;
+import org.apache.lucene.store.blockcache.BlockDirectoryCache;
+import org.apache.lucene.store.blockcache.BufferStore;
+import org.apache.lucene.store.blockcache.Cache;
+import org.apache.lucene.store.blockcache.Metrics;
+import org.apache.lucene.store.hdfs.HdfsDirectory;
+import org.apache.lucene.store.hdfs.HdfsLockFactory;
 import org.apache.solr.cloud.ZkController;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.IOUtils;
 import org.apache.solr.common.util.NamedList;
-import org.apache.solr.store.blockcache.BlockCache;
-import org.apache.solr.store.blockcache.BlockDirectory;
-import org.apache.solr.store.blockcache.BlockDirectoryCache;
-import org.apache.solr.store.blockcache.BufferStore;
-import org.apache.solr.store.blockcache.Cache;
-import org.apache.solr.store.blockcache.Metrics;
-import org.apache.solr.store.hdfs.HdfsDirectory;
-import org.apache.solr.store.hdfs.HdfsLockFactory;
+import org.apache.solr.store.blockcache.SolrMetrics;
 import org.apache.solr.util.HdfsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,7 +113,7 @@ public class HdfsDirectoryFactory extends CachingDirectoryFactory {
   private final static class MetricsHolder {
     // [JCIP SE, Goetz, 16.6] Lazy initialization
     // Won't load until MetricsHolder is referenced
-    public static final Metrics metrics = new Metrics();
+    public static final Metrics metrics = new SolrMetrics();
   }
   
   @Override
@@ -443,7 +444,7 @@ public class HdfsDirectoryFactory extends CachingDirectoryFactory {
 
   @Override
   public Collection<SolrInfoMBean> offerMBeans() {
-    return Arrays.<SolrInfoMBean>asList(MetricsHolder.metrics);
+    return Arrays.<SolrInfoMBean>asList((SolrInfoMBean) MetricsHolder.metrics);
   }
 
   @Override
